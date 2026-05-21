@@ -1,7 +1,8 @@
 import axios, { AxiosInstance } from 'axios'
 import { getIdToken } from './auth'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+// Siempre usar misma origen — API está en el mismo dominio (Vercel)
+const BASE_URL = ''
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
