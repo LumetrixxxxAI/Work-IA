@@ -1,6 +1,12 @@
 {
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts",
+      "methods": ["GET", "POST", "DELETE", "OPTIONS"]
+    },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
