@@ -1,18 +1,6 @@
 {
-  "version": 2,
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,DELETE,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type,Authorization" }
-      ]
-    }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/handler" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/handler" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
