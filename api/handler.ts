@@ -61,19 +61,28 @@ async function ask(system: string, userContent: any) {
 
 // ── Handler principal ─────────────────────────────────────────────────
 
+function sendJson(res: any, status: number, data: any) {
+  res.statusCode = status
+  res.setHeader('Content-Type', 'application/json')
+  res.end(JSON.stringify(data))
+}
+
 export default async function handler(req: any, res: any) {
+  try {
   setCors(res)
 
   // Preflight CORS
   if (req.method === 'OPTIONS') {
-    return res.status(200).end()
+    res.statusCode = 200
+    res.end()
+    return
   }
 
   const path = getPath(req)
 
   // Health check
   if (req.method === 'GET' && path === '/health') {
-    return res.json({ ok: true })
+    return sendJson(res, 200, { ok: true, path, method: req.method })
   }
 
   // Stripe webhook (sin auth)
@@ -107,8 +116,8 @@ export default async function handler(req: any, res: any) {
     const decoded = await verifyAuth(req)
     userId = decoded.uid
     userEmail = decoded.email
-  } catch {
-    return res.status(401).json({ error: 'No autorizado' })
+  } catch (authErr: any) {
+    return sendJson(res, 401, { error: 'No autorizado', detail: authErr.message })
   }
 
   const body = req.body ?? {}
@@ -258,9 +267,16 @@ export default async function handler(req: any, res: any) {
       return res.json({ url: session.url })
     }
 
-    return res.status(404).json({ error: 'Ruta no encontrada', path })
+    return sendJson(res, 404, { error: 'Ruta no encontrada', path })
 
   } catch (e: any) {
-    return res.status(500).json({ error: e.message })
+    return sendJson(res, 500, { error: e.message })
+  }
+
+  } catch (fatal: any) {
+    console.error('FATAL ERROR:', fatal.message, fatal.stack)
+    res.statusCode = 500
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify({ fatal: fatal.message }))
   }
 }
