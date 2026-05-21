@@ -240,4 +240,4 @@ app.post('/api/stripe/portal', auth, async (req: any, res) => {
   } catch (e: any) { res.status(500).json({ error: e.message }) }
 })
 
-module.exports = app
+export default app
