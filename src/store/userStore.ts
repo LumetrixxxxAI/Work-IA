@@ -72,6 +72,6 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
   clearUser: () => {
     set({ user: null, hasAccess: false })
-    localStorage.removeItem('userProfile')
+    // No borrar localStorage — loadProfile lo recarga con verificación de uid
   },
 }))

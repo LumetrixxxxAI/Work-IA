@@ -25,9 +25,11 @@ const TIPO_LABELS: Record<string, string> = {
   corrector: 'Corrector',
 }
 
-function formatFecha(fecha: { seconds: number }) {
-  const date = new Date(fecha.seconds * 1000)
-  return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+function formatFecha(fecha: any) {
+  const seconds = fecha?._seconds ?? fecha?.seconds
+  if (!seconds) return 'Sin fecha'
+  const date = new Date(seconds * 1000)
+  return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 export function HistorialScreen() {
