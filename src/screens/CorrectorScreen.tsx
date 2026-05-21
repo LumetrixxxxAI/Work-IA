@@ -1,4 +1,5 @@
 import React, { useState, CSSProperties } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { ResultBox } from '../components/ResultBox'
@@ -27,6 +28,7 @@ function CorrectorContent() {
   const [result, setResult] = useState<CorrectorResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { user } = useUser()
+  const navigate = useNavigate()
 
   const handleGenerar = async () => {
     if (!texto.trim()) { setError('Escribe o pega tu redacción.'); return }
@@ -45,6 +47,7 @@ function CorrectorContent() {
         parametros: { modo },
       })
     } catch (e: unknown) {
+      if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al corregir. Inténtalo de nuevo.')
     } finally {
       setLoading(false)

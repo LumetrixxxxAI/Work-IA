@@ -1,4 +1,5 @@
 import React, { useState, CSSProperties } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
@@ -34,6 +35,7 @@ export function ComentarioScreen() {
   const [result, setResult] = useState<ComentarioResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { user } = useUser()
+  const navigate = useNavigate()
 
   const handleGenerar = async () => {
     if (!texto.trim() && !file) { setError('Pega el texto a comentar o sube un archivo.'); return }
@@ -55,6 +57,7 @@ export function ComentarioScreen() {
         parametros: { tipo, nivel },
       })
     } catch (e: unknown) {
+      if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al comentar. Inténtalo de nuevo.')
     } finally {
       setLoading(false)

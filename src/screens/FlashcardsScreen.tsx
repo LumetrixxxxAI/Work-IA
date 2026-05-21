@@ -1,4 +1,5 @@
 import React, { useState, CSSProperties } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
@@ -29,6 +30,7 @@ function FlashcardsContent() {
   const [result, setResult] = useState<FlashcardsResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { user } = useUser()
+  const navigate = useNavigate()
 
   const handleGenerar = async () => {
     if (!texto.trim() && !file) { setError('Pega el texto o sube un archivo.'); return }
@@ -49,6 +51,7 @@ function FlashcardsContent() {
         parametros: { num },
       })
     } catch (e: unknown) {
+      if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al generar. Inténtalo de nuevo.')
     } finally {
       setLoading(false)

@@ -59,6 +59,51 @@ async function ask(system: string, userContent: any) {
   return { text, tokensUsados: r.usage.input_tokens + r.usage.output_tokens }
 }
 
+// ── Usage limits ──────────────────────────────────────────────────────
+
+const FREE_DAILY = 3
+const FREE_MONTHLY = 20
+const PRO_MONTHLY = 80
+const AI_PATHS = new Set(['/resumen', '/ejercicios', '/clase', '/examen', '/comentario', '/esquema', '/flashcards', '/corrector'])
+
+async function checkAndIncrementUsage(userId: string): Promise<void> {
+  const db = getFirestore()
+  const userRef = db.collection('users').doc(userId)
+  const userDoc = await userRef.get()
+  const data = userDoc.data() ?? {}
+  const isPro = data.isPro === true
+  const today = new Date().toISOString().slice(0, 10)
+  const thisMonth = today.slice(0, 7)
+  const usage = data.usage ?? {}
+  const dailyCount = usage.dailyDate === today ? (usage.dailyCount ?? 0) : 0
+  const monthlyCount = usage.monthlyMonth === thisMonth ? (usage.monthlyCount ?? 0) : 0
+
+  if (!isPro) {
+    if (dailyCount >= FREE_DAILY) {
+      const err: any = new Error(`Límite diario alcanzado (${FREE_DAILY}/día en plan gratuito). Actualiza a Pro para continuar.`)
+      err.isLimit = true; throw err
+    }
+    if (monthlyCount >= FREE_MONTHLY) {
+      const err: any = new Error(`Límite mensual alcanzado (${FREE_MONTHLY}/mes en plan gratuito). Actualiza a Pro para continuar.`)
+      err.isLimit = true; throw err
+    }
+  } else {
+    if (monthlyCount >= PRO_MONTHLY) {
+      const err: any = new Error(`Límite mensual Pro alcanzado (${PRO_MONTHLY}/mes). Escríbenos si necesitas más.`)
+      err.isLimit = true; throw err
+    }
+  }
+
+  await userRef.set({
+    usage: {
+      dailyCount: dailyCount + 1,
+      dailyDate: today,
+      monthlyCount: monthlyCount + 1,
+      monthlyMonth: thisMonth,
+    }
+  }, { merge: true })
+}
+
 // ── Handler principal ─────────────────────────────────────────────────
 
 function sendJson(res: any, status: number, data: any) {
@@ -123,6 +168,34 @@ export default async function handler(req: any, res: any) {
   const body = req.body ?? {}
 
   try {
+    // USAGE CHECK para rutas de IA
+    if (AI_PATHS.has(path) && req.method === 'POST') {
+      try {
+        await checkAndIncrementUsage(userId)
+      } catch (e: any) {
+        if (e.isLimit) return sendJson(res, 429, { error: e.message, isLimit: true })
+        throw e
+      }
+    }
+
+    // GET /usage
+    if (req.method === 'GET' && path === '/usage') {
+      const db = getFirestore()
+      const userDoc = await db.collection('users').doc(userId).get()
+      const data = userDoc.data() ?? {}
+      const isPro = data.isPro === true
+      const today = new Date().toISOString().slice(0, 10)
+      const thisMonth = today.slice(0, 7)
+      const usage = data.usage ?? {}
+      return sendJson(res, 200, {
+        isPro,
+        dailyCount: usage.dailyDate === today ? (usage.dailyCount ?? 0) : 0,
+        dailyLimit: isPro ? null : FREE_DAILY,
+        monthlyCount: usage.monthlyMonth === thisMonth ? (usage.monthlyCount ?? 0) : 0,
+        monthlyLimit: isPro ? PRO_MONTHLY : FREE_MONTHLY,
+      })
+    }
+
     // RESUMEN
     if (req.method === 'POST' && path === '/resumen') {
       const { texto, fileBase64, fileType, longitud, curso } = body

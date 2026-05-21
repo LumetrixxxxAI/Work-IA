@@ -1,4 +1,5 @@
 import React, { useState, CSSProperties } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { ResultBox } from '../components/ResultBox'
@@ -33,6 +34,7 @@ export function ExamenScreen() {
   const [result, setResult] = useState<ExamenResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { user } = useUser()
+  const navigate = useNavigate()
 
   const handleGenerar = async () => {
     if (!tema.trim()) { setError('Escribe el tema del examen.'); return }
@@ -52,6 +54,7 @@ export function ExamenScreen() {
         parametros: { tipo, numPreguntas },
       })
     } catch (e: unknown) {
+      if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al generar. Inténtalo de nuevo.')
     } finally {
       setLoading(false)

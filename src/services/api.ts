@@ -20,6 +20,19 @@ apiClient.interceptors.request.use(async (config) => {
   return config
 })
 
+// Interceptor de respuesta: propagar errores de límite con flag especial
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 429 && error.response?.data?.isLimit) {
+      const limitError: any = new Error(error.response.data.error)
+      limitError.isLimit = true
+      return Promise.reject(limitError)
+    }
+    return Promise.reject(error)
+  }
+)
+
 // --- RESUMEN ---
 export interface ResumenParams {
   texto: string; fileBase64?: string; fileType?: string
@@ -118,4 +131,17 @@ export async function obtenerHistorial(): Promise<HistorialItem[]> {
 }
 export async function borrarHistorialItem(itemId: string): Promise<void> {
   await apiClient.delete(`/api/historial/${itemId}`)
+}
+
+// --- USAGE ---
+export interface UsageInfo {
+  isPro: boolean
+  dailyCount: number
+  dailyLimit: number | null
+  monthlyCount: number
+  monthlyLimit: number
+}
+export async function getUsage(): Promise<UsageInfo> {
+  const { data } = await apiClient.get<UsageInfo>('/api/usage')
+  return data
 }

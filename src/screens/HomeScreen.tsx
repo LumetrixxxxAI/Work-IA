@@ -1,9 +1,10 @@
-import React, { CSSProperties } from 'react'
+import React, { CSSProperties, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { useUser } from '../hooks/useUser'
 import { useSubscriptionStore } from '../store/subscriptionStore'
 import { colors, gradients } from '../theme/colors'
+import { getUsage, UsageInfo } from '../services/api'
 
 const ALL_TOOLS = [
   { icon: '📝', title: 'Resumen', description: 'Resume apuntes, PDFs e imágenes', gradient: gradients.cardResumen, path: '/resumen', pro: false },
@@ -71,6 +72,11 @@ export function HomeScreen() {
   const navigate = useNavigate()
   const { user, cursoLabel } = useUser()
   const { isPro } = useSubscriptionStore()
+  const [usage, setUsage] = useState<UsageInfo | null>(null)
+
+  useEffect(() => {
+    getUsage().then(setUsage).catch(() => {})
+  }, [])
 
   const initial = (user?.nombre ?? user?.displayName ?? 'U')[0].toUpperCase()
 
@@ -126,6 +132,45 @@ export function HomeScreen() {
             <span style={{ fontSize: 13, fontWeight: 600, color: colors.blue400 }}>
               ✨ Actualiza a Pro · 3,99€/mes →
             </span>
+          </div>
+        )}
+
+        {/* Usage counter (free plan only) */}
+        {usage && !usage.isPro && (
+          <div style={{
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 12, padding: '12px 16px', marginBottom: 20,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>Uso de hoy</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: usage.dailyCount >= (usage.dailyLimit ?? 3) ? '#F87171' : colors.blue400 }}>
+                {usage.dailyCount}/{usage.dailyLimit} consultas
+              </span>
+            </div>
+            <div style={{ height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 8 }}>
+              <div style={{
+                height: '100%', borderRadius: 3,
+                width: `${Math.min(100, (usage.dailyCount / (usage.dailyLimit ?? 1)) * 100)}%`,
+                background: usage.dailyCount >= (usage.dailyLimit ?? 1)
+                  ? 'linear-gradient(90deg, #EF4444, #F87171)'
+                  : 'linear-gradient(90deg, #38BDF8, #7DD3FC)',
+                transition: 'width 0.4s ease',
+              }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
+                Este mes: {usage.monthlyCount}/{usage.monthlyLimit}
+              </span>
+              {usage.dailyCount >= (usage.dailyLimit ?? 1) && (
+                <span
+                  onClick={() => navigate('/paywall')}
+                  style={{ fontSize: 11, fontWeight: 700, color: '#FBBF24', cursor: 'pointer' }}
+                >
+                  Obtener Pro →
+                </span>
+              )}
+            </div>
           </div>
         )}
 
