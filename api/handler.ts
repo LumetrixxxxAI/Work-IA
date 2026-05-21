@@ -47,7 +47,7 @@ function buildContent(text: string, b64?: string, type?: string) {
 
 async function ask(system: string, userContent: any) {
   const r = await claude.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
+    model: 'claude-sonnet-4-5',
     max_tokens: 8096,
     system,
     messages: [{ role: 'user', content: userContent }],
