@@ -72,8 +72,26 @@ export function HomeScreen() {
   const navigate = useNavigate()
   const { user, cursoLabel } = useUser()
   const { isPro } = useSubscriptionStore()
-  const [usage, setUsage] = useState<UsageInfo | null>(null)
+  // Inicializar con datos del store local inmediatamente (sin esperar API)
+  const [usage, setUsage] = useState<UsageInfo>(() => ({
+    isPro,
+    dailyCount: 0,
+    dailyLimit: isPro ? null : 3,
+    monthlyCount: 0,
+    monthlyLimit: isPro ? 80 : 20,
+  }))
 
+  // Actualizar isPro si el store cambia
+  useEffect(() => {
+    setUsage(prev => ({
+      ...prev,
+      isPro,
+      dailyLimit: isPro ? null : 3,
+      monthlyLimit: isPro ? 80 : 20,
+    }))
+  }, [isPro])
+
+  // Cargar conteos reales desde la API
   useEffect(() => {
     getUsage().then(setUsage).catch(() => {})
   }, [])
