@@ -17,6 +17,55 @@ const ALL_TOOLS = [
   { icon: '✏️', title: 'Corrector', description: 'Corrige y mejora tus redacciones', gradient: gradients.cardCorrector, path: '/corrector', pro: true },
 ]
 
+function UsageBar({ isPro, dailyCount, monthlyCount, onUpgrade }: {
+  isPro: boolean; dailyCount: number; monthlyCount: number; onUpgrade: () => void
+}) {
+  const dailyLimit = 3
+  const monthlyLimit = isPro ? 80 : 20
+  const count = isPro ? monthlyCount : dailyCount
+  const limit = isPro ? monthlyLimit : dailyLimit
+  const pct = limit > 0 ? Math.min(100, (count / limit) * 100) : 0
+  const atLimit = count >= limit
+  const nearLimit = count >= limit * 0.8
+  const barColor = atLimit
+    ? 'linear-gradient(90deg,#EF4444,#F87171)'
+    : nearLimit
+      ? 'linear-gradient(90deg,#F59E0B,#FBBF24)'
+      : isPro
+        ? 'linear-gradient(90deg,#F59E0B,#FBBF24)'
+        : 'linear-gradient(90deg,#38BDF8,#7DD3FC)'
+  const numColor = atLimit ? '#F87171' : isPro ? '#FBBF24' : '#38BDF8'
+  return (
+    <div style={{
+      background: isPro ? 'rgba(251,191,36,0.08)' : 'rgba(255,255,255,0.06)',
+      border: `1px solid ${isPro ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.12)'}`,
+      borderRadius: 12, padding: '12px 16px', marginBottom: 20,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: isPro ? '#FBBF24' : 'rgba(255,255,255,0.7)' }}>
+          {isPro ? '👑 Uso mensual Pro' : '📊 Uso de hoy'}
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: numColor }}>
+          {count}/{limit} consultas
+        </span>
+      </div>
+      <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 8 }}>
+        <div style={{ height: '100%', borderRadius: 3, width: `${pct}%`, background: barColor }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
+          {isPro ? `Hoy: ${dailyCount} consultas` : `Este mes: ${monthlyCount}/20`}
+        </span>
+        {!isPro && atLimit && (
+          <span onClick={onUpgrade} style={{ fontSize: 11, fontWeight: 700, color: '#FBBF24', cursor: 'pointer' }}>
+            Obtener Pro →
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function ToolCard({ icon, title, description, gradient, isPro, locked, onClick }: {
   icon: string; title: string; description: string; gradient: string
   isPro: boolean; locked: boolean; onClick: () => void
@@ -73,11 +122,12 @@ export function HomeScreen() {
   const { user, cursoLabel } = useUser()
   const { isPro } = useSubscriptionStore()
   // Inicializar con datos del store local inmediatamente (sin esperar API)
-  const [counts, setCounts] = useState({ daily: 0, monthly: 0 })
+  const [dailyCount, setDailyCount] = useState(0)
+  const [monthlyCount, setMonthlyCount] = useState(0)
 
   useEffect(() => {
     getUsage()
-      .then(d => setCounts({ daily: d.dailyCount, monthly: d.monthlyCount }))
+      .then(d => { setDailyCount(d.dailyCount); setMonthlyCount(d.monthlyCount) })
       .catch(() => {})
   }, [])
 
@@ -139,50 +189,7 @@ export function HomeScreen() {
         )}
 
         {/* Usage counter — siempre visible */}
-        {(() => {
-          const dailyLimit = isPro ? 80 : 3
-          const monthlyLimit = isPro ? 80 : 20
-          const count = isPro ? counts.monthly : counts.daily
-          const limit = isPro ? monthlyLimit : dailyLimit
-          const pct = Math.min(100, limit > 0 ? (count / limit) * 100 : 0)
-          const barColor = count >= limit
-            ? 'linear-gradient(90deg, #EF4444, #F87171)'
-            : count >= limit * 0.8
-              ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
-              : isPro
-                ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
-                : 'linear-gradient(90deg, #38BDF8, #7DD3FC)'
-          const textColor = count >= limit ? '#F87171' : isPro ? '#FBBF24' : colors.blue400
-          return (
-            <div style={{
-              backgroundColor: isPro ? 'rgba(251,191,36,0.08)' : 'rgba(255,255,255,0.06)',
-              border: `1px solid ${isPro ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.12)'}`,
-              borderRadius: 12, padding: '12px 16px', marginBottom: 20,
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: isPro ? '#FBBF24' : 'rgba(255,255,255,0.7)' }}>
-                  {isPro ? '👑 Uso mensual Pro' : 'Uso de hoy'}
-                </span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: textColor }}>
-                  {isPro ? `${counts.monthly}/${monthlyLimit}` : `${counts.daily}/${dailyLimit}`} consultas
-                </span>
-              </div>
-              <div style={{ height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 8 }}>
-                <div style={{ height: '100%', borderRadius: 3, width: `${pct}%`, background: barColor, transition: 'width 0.4s ease' }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
-                  {isPro ? `Hoy: ${counts.daily} consultas` : `Este mes: ${counts.monthly}/${monthlyLimit}`}
-                </span>
-                {!isPro && counts.daily >= dailyLimit && (
-                  <span onClick={() => navigate('/paywall')} style={{ fontSize: 11, fontWeight: 700, color: '#FBBF24', cursor: 'pointer' }}>
-                    Obtener Pro →
-                  </span>
-                )}
-              </div>
-            </div>
-          )
-        })()}
+        <UsageBar isPro={isPro} dailyCount={dailyCount} monthlyCount={monthlyCount} onUpgrade={() => navigate('/paywall')} />
 
         {/* All tools */}
         <p style={{
