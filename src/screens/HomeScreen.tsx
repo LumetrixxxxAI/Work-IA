@@ -135,34 +135,53 @@ export function HomeScreen() {
           </div>
         )}
 
-        {/* Usage counter (free plan only) */}
-        {usage && !usage.isPro && (
+        {/* Usage counter */}
+        {usage && (
           <div style={{
-            backgroundColor: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
+            backgroundColor: usage.isPro ? 'rgba(251,191,36,0.08)' : 'rgba(255,255,255,0.06)',
+            border: `1px solid ${usage.isPro ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.12)'}`,
             borderRadius: 12, padding: '12px 16px', marginBottom: 20,
           }}>
+            {/* Fila título */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>Uso de hoy</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: usage.dailyCount >= (usage.dailyLimit ?? 3) ? '#F87171' : colors.blue400 }}>
-                {usage.dailyCount}/{usage.dailyLimit} consultas
+              <span style={{ fontSize: 12, fontWeight: 600, color: usage.isPro ? '#FBBF24' : 'rgba(255,255,255,0.7)' }}>
+                {usage.isPro ? '👑 Uso mensual Pro' : 'Uso de hoy'}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: (() => {
+                const count = usage.isPro ? usage.monthlyCount : usage.dailyCount
+                const limit = usage.isPro ? usage.monthlyLimit : (usage.dailyLimit ?? 3)
+                if (count >= limit) return '#F87171'
+                if (count >= limit * 0.8) return '#FBBF24'
+                return usage.isPro ? '#FBBF24' : colors.blue400
+              })() }}>
+                {usage.isPro ? `${usage.monthlyCount}/${usage.monthlyLimit}` : `${usage.dailyCount}/${usage.dailyLimit}`} consultas
               </span>
             </div>
+
+            {/* Barra de progreso */}
             <div style={{ height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 8 }}>
               <div style={{
                 height: '100%', borderRadius: 3,
-                width: `${Math.min(100, (usage.dailyCount / (usage.dailyLimit ?? 1)) * 100)}%`,
-                background: usage.dailyCount >= (usage.dailyLimit ?? 1)
-                  ? 'linear-gradient(90deg, #EF4444, #F87171)'
-                  : 'linear-gradient(90deg, #38BDF8, #7DD3FC)',
+                width: `${Math.min(100, ((usage.isPro ? usage.monthlyCount : usage.dailyCount) / (usage.isPro ? usage.monthlyLimit : (usage.dailyLimit ?? 1))) * 100)}%`,
+                background: (() => {
+                  const count = usage.isPro ? usage.monthlyCount : usage.dailyCount
+                  const limit = usage.isPro ? usage.monthlyLimit : (usage.dailyLimit ?? 1)
+                  if (count >= limit) return 'linear-gradient(90deg, #EF4444, #F87171)'
+                  if (count >= limit * 0.8) return 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+                  return usage.isPro ? 'linear-gradient(90deg, #F59E0B, #FBBF24)' : 'linear-gradient(90deg, #38BDF8, #7DD3FC)'
+                })(),
                 transition: 'width 0.4s ease',
               }} />
             </div>
+
+            {/* Fila inferior */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
-                Este mes: {usage.monthlyCount}/{usage.monthlyLimit}
+                {usage.isPro
+                  ? `Hoy: ${usage.dailyCount} consultas`
+                  : `Este mes: ${usage.monthlyCount}/${usage.monthlyLimit}`}
               </span>
-              {usage.dailyCount >= (usage.dailyLimit ?? 1) && (
+              {!usage.isPro && usage.dailyCount >= (usage.dailyLimit ?? 1) && (
                 <span
                   onClick={() => navigate('/paywall')}
                   style={{ fontSize: 11, fontWeight: 700, color: '#FBBF24', cursor: 'pointer' }}
