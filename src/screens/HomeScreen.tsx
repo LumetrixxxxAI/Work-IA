@@ -121,7 +121,7 @@ export function HomeScreen() {
   const navigate = useNavigate()
   const { user, cursoLabel } = useUser()
   const { isPro } = useSubscriptionStore()
-  // Inicializar con datos del store local inmediatamente (sin esperar API)
+  console.log('🔵 HomeScreen v6 isPro=', isPro)
   const [dailyCount, setDailyCount] = useState(0)
   const [monthlyCount, setMonthlyCount] = useState(0)
 
