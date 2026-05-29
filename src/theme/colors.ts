@@ -1,0 +1,30 @@
+export const colors = {
+  blue900: '#0C4A6E',
+  blue800: '#075985',
+  blue700: '#0369A1',
+  blue600: '#0284C7',
+  blue500: '#0EA5E9',
+  blue400: '#38BDF8',
+  blue200: '#BAE6FD',
+  blue100: '#E0F2FE',
+  white: '#FFFFFF',
+  glass: 'rgba(255,255,255,0.10)',
+  glassBorder: 'rgba(255,255,255,0.18)',
+  muted: 'rgba(255,255,255,0.60)',
+  error: '#EF4444',
+  success: '#22C55E',
+  warning: '#F59E0B',
+  black: '#000000',
+}
+
+export const gradients = {
+  background: 'linear-gradient(180deg, #075985 0%, #0284C7 50%, #075985 100%)',
+  cardResumen: 'linear-gradient(135deg, #0284C7, #38BDF8)',
+  cardEjercicios: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
+  cardClase: 'linear-gradient(135deg, #065F46, #10B981)',
+  cardExamen: 'linear-gradient(135deg, #92400E, #F59E0B)',
+  cardComentario: 'linear-gradient(135deg, #9D174D, #EC4899)',
+  cardEsquema: 'linear-gradient(135deg, #0C4A6E, #0EA5E9)',
+  cardFlashcards: 'linear-gradient(135deg, #4C1D95, #6D28D9)',
+  cardCorrector: 'linear-gradient(135deg, #134E4A, #0F766E)',
+}
