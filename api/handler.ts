@@ -145,19 +145,28 @@ export default async function handler(req: any, res: any) {
       const sig = req.headers['stripe-signature'] as string
       const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET ?? '')
       const db = getFirestore()
-      const updatePro = async (customerId: string, isPro: boolean) => {
+      const PRICE_PREMIUM = process.env.STRIPE_PRICE_ID_PREMIUM ?? ''
+
+      const updateSubscription = async (customerId: string, active: boolean, priceId?: string) => {
         const snap = await db.collection('users').where('stripeCustomerId', '==', customerId).limit(1).get()
-        if (!snap.empty) await snap.docs[0].ref.set({ isPro }, { merge: true })
+        if (!snap.empty) {
+          const isPremium = active && priceId === PRICE_PREMIUM
+          await snap.docs[0].ref.set({ isPro: active, isPremium: active ? isPremium : false }, { merge: true })
+        }
       }
-      const customerId = (event.data.object as { customer: string }).customer
+
+      const obj = event.data.object as any
+      const customerId = obj.customer
+      const priceId = obj.lines?.data?.[0]?.price?.id ?? obj.plan?.id ?? ''
+
       if (['checkout.session.completed', 'invoice.paid'].includes(event.type)) {
-        await updatePro(customerId, true)
+        await updateSubscription(customerId, true, priceId)
       } else if (['customer.subscription.deleted', 'invoice.payment_failed'].includes(event.type)) {
-        await updatePro(customerId, false)
+        await updateSubscription(customerId, false)
       }
-      return res.json({ received: true })
+      return sendJson(res, 200, { received: true })
     } catch (e: any) {
-      return res.status(400).json({ error: e.message })
+      return sendJson(res, 400, { error: e.message })
     }
   }
 
@@ -317,8 +326,11 @@ export default async function handler(req: any, res: any) {
     if (req.method === 'POST' && path === '/stripe/checkout') {
       const Stripe = (await import('stripe')).default
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '')
-      const PRICE_ID = process.env.STRIPE_PRICE_ID ?? ''
-      if (!PRICE_ID) return res.status(500).json({ error: 'Stripe no configurado' })
+      const plan = body.plan ?? 'pro'
+      const PRICE_ID = plan === 'premium'
+        ? (process.env.STRIPE_PRICE_ID_PREMIUM ?? '')
+        : (process.env.STRIPE_PRICE_ID ?? '')
+      if (!PRICE_ID) return sendJson(res, 500, { error: 'Stripe no configurado' })
       const db = getFirestore()
       const userDoc = await db.collection('users').doc(userId).get()
       let customerId = userDoc.data()?.stripeCustomerId
@@ -336,7 +348,7 @@ export default async function handler(req: any, res: any) {
         cancel_url: body.cancelUrl,
         locale: 'es',
       })
-      return res.json({ url: session.url })
+      return sendJson(res, 200, { url: session.url })
     }
 
     // STRIPE PORTAL
