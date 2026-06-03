@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
-import { ResultBox } from '../components/ResultBox'
+import { FlashcardViewer } from '../components/FlashcardViewer'
 import { ProGate } from '../components/ProGate'
 import { generarFlashcards, FlashcardsResponse } from '../services/api'
 import { saveToHistorial } from '../services/historial'
@@ -104,7 +104,7 @@ function FlashcardsContent() {
         {loading ? '⏳ Generando...' : '🃏 Crear flashcards'}
       </button>
 
-      {result && <ResultBox content={result.flashcards} tokensUsados={result.tokensUsados} label={`${num} flashcards generadas`} />}
+      {result && <FlashcardViewer content={result.flashcards} tokensUsados={result.tokensUsados} />}
     </div>
   )
 }
