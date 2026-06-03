@@ -1,5 +1,5 @@
 import React, { CSSProperties } from 'react'
-import { HashRouter as BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter as BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { LoginScreen } from './screens/LoginScreen'
 import { HomeScreen } from './screens/HomeScreen'
@@ -53,15 +53,11 @@ function Splash() {
   )
 }
 
-export function App() {
-  const { authState } = useAuth()
-
-  if (authState === 'loading') return <Splash />
-  if (authState === 'unauthenticated') return <LoginScreen />
-
+function AnimatedRoutes() {
+  const location = useLocation()
   return (
-    <BrowserRouter>
-      <Routes>
+    <div key={location.pathname} className="page-root page-enter" style={{ height: '100%' }}>
+      <Routes location={location}>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/resumen" element={<ResumenScreen />} />
@@ -79,6 +75,19 @@ export function App() {
         <Route path="/success" element={<SuccessScreen />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
+    </div>
+  )
+}
+
+export function App() {
+  const { authState } = useAuth()
+
+  if (authState === 'loading') return <Splash />
+  if (authState === 'unauthenticated') return <LoginScreen />
+
+  return (
+    <BrowserRouter>
+      <AnimatedRoutes />
     </BrowserRouter>
   )
 }

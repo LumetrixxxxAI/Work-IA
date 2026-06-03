@@ -2,7 +2,7 @@ import React, { useState, CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
-import { ResultBox } from '../components/ResultBox'
+import { ExamViewer } from '../components/ExamViewer'
 import { generarExamen, ExamenResponse } from '../services/api'
 import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
@@ -117,10 +117,11 @@ export function ExamenScreen() {
         </button>
 
         {result && (
-          <ResultBox
+          <ExamViewer
             content={result.preguntas}
+            numPreguntas={result.numPreguntas}
+            tipo={result.tipo}
             tokensUsados={result.tokensUsados}
-            label={`${result.numPreguntas} preguntas · ${result.tipo}`}
           />
         )}
       </div>

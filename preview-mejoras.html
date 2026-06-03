@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>WorkIA — Preview Mejoras</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(180deg, #075985 0%, #0284C7 50%, #075985 100%);
+    min-height: 100vh;
+    display: flex; justify-content: center;
+    padding: 24px 16px 48px;
+  }
+  .container { width: 100%; max-width: 390px; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    cursor: pointer; border: 1.5px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06);
+    transition: all 0.15s;
+  }
+  .tab.active {
+    background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); color: #fff;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ══════════════════════════════════════
+     2. EXAMEN — TARJETAS
+  ══════════════════════════════════════ */
+  .exam-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .exam-title { font-size: 13px; font-weight: 700; color: #FCD34D; }
+  .exam-count {
+    font-size: 11px; color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.08); padding: 3px 10px; border-radius: 20px;
+  }
+
+  .question-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; margin-bottom: 10px;
+    overflow: hidden; transition: border-color 0.2s;
+  }
+  .question-card:hover { border-color: rgba(251,191,36,0.3); }
+
+  .question-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; cursor: pointer;
+  }
+  .question-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #F59E0B, #FBBF24);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: #78350F;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .question-text { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.5; flex: 1; }
+  .question-arrow { color: rgba(255,255,255,0.3); font-size: 14px; flex-shrink: 0; transition: transform 0.2s; }
+  .question-card.open .question-arrow { transform: rotate(90deg); }
+
+  /* Opciones test */
+  .question-body { padding: 0 16px 14px 56px; display: none; }
+  .question-card.open .question-body { display: block; }
+
+  .option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 10px; margin-bottom: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    font-size: 13px; color: rgba(255,255,255,0.75);
+  }
+  .option.correct {
+    background: rgba(34,197,94,0.12);
+    border-color: rgba(34,197,94,0.3);
+    color: #4ADE80; font-weight: 600;
+  }
+  .option-letter {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .option.correct .option-letter { background: rgba(34,197,94,0.25); color: #4ADE80; }
+
+  /* Respuesta desarrollo */
+  .dev-answer {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-left: 3px solid #FBBF24;
+    border-radius: 8px; padding: 10px 12px;
+    font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6;
+  }
+
+  /* ══════════════════════════════════════
+     3. CORRECTOR — DIFF
+  ══════════════════════════════════════ */
+  .corrector-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .ctab {
+    flex: 1; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-align: center; border: none;
+  }
+  .ctab.active { background: rgba(255,255,255,0.15); color: #fff; }
+  .ctab.inactive { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+
+  .diff-box {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 16px;
+    font-size: 14px; line-height: 1.9; color: rgba(255,255,255,0.85);
+    margin-bottom: 14px;
+  }
+  .err {
+    background: rgba(239,68,68,0.2);
+    color: #FCA5A5;
+    text-decoration: line-through;
+    border-radius: 3px; padding: 0 3px;
+    font-weight: 600;
+  }
+  .fix {
+    background: rgba(34,197,94,0.2);
+    color: #86EFAC;
+    border-radius: 3px; padding: 0 3px;
+    font-weight: 600;
+  }
+
+  .corrections-title {
+    font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .correction-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: 10px; margin-bottom: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 13px;
+  }
+  .corr-wrong { color: #FCA5A5; text-decoration: line-through; }
+  .corr-arrow { color: rgba(255,255,255,0.3); }
+  .corr-right { color: #86EFAC; font-weight: 600; }
+
+  /* Texto limpio */
+  .clean-box {
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 16px; padding: 16px;
+    font-size: 14px; line-height: 1.9; color: rgba(255,255,255,0.85);
+  }
+
+  /* ══════════════════════════════════════
+     4. TRANSICIONES
+  ══════════════════════════════════════ */
+  .transition-demo {
+    position: relative; overflow: hidden;
+    border-radius: 20px; height: 280px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .screen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 20px;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+  }
+  .screen.hidden-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+  .screen.hidden-left  { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+
+  .screen-title { font-size: 16px; font-weight: 700; color: #fff; }
+  .screen-sub { font-size: 13px; color: rgba(255,255,255,0.5); text-align: center; }
+  .screen-icon { font-size: 48px; }
+
+  .fake-card {
+    width: 100%; background: rgba(255,255,255,0.08);
+    border-radius: 12px; height: 44px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .trans-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .trans-btn {
+    flex: 1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; background: rgba(255,255,255,0.1); color: #fff;
+  }
+  .trans-btn:hover { background: rgba(255,255,255,0.18); }
+  .trans-desc {
+    text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 10px;
+  }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="tabs">
+    <div class="tab active" onclick="show('examen',this)">📋 Examen</div>
+    <div class="tab" onclick="show('corrector',this)">✏️ Corrector</div>
+    <div class="tab" onclick="show('transicion',this)">✨ Transiciones</div>
+  </div>
+
+  <!-- ══ PANEL EXAMEN ══ -->
+  <div id="panel-examen" class="panel active">
+    <div class="exam-header">
+      <span class="exam-title">📋 Preguntas de examen</span>
+      <span class="exam-count">5 preguntas · mixto</span>
+    </div>
+
+    <!-- Test -->
+    <div class="question-card open" onclick="toggle(this)">
+      <div class="question-header">
+        <div class="question-num">1</div>
+        <p class="question-text">¿Cuál es la fórmula química de la glucosa producida en la fotosíntesis?</p>
+        <span class="question-arrow">›</span>
+      </div>
+      <div class="question-body">
+        <div class="option"><span class="option-letter">A</span>H₂O</div>
+        <div class="option"><span class="option-letter">B</span>CO₂</div>
+        <div class="option correct"><span class="option-letter">C</span>C₆H₁₂O₆ ✓</div>
+        <div class="option"><span class="option-letter">D</span>O₂</div>
+      </div>
+    </div>
+
+    <div class="question-card" onclick="toggle(this)">
+      <div class="question-header">
+        <div class="question-num">2</div>
+        <p class="question-text">¿En qué orgánulo ocurre la fotosíntesis?</p>
+        <span class="question-arrow">›</span>
+      </div>
+      <div class="question-body">
+        <div class="option"><span class="option-letter">A</span>Mitocondria</div>
+        <div class="option correct"><span class="option-letter">B</span>Cloroplasto ✓</div>
+        <div class="option"><span class="option-letter">C</span>Núcleo</div>
+        <div class="option"><span class="option-letter">D</span>Ribosoma</div>
+      </div>
+    </div>
+
+    <!-- Desarrollo -->
+    <div class="question-card" onclick="toggle(this)">
+      <div class="question-header">
+        <div class="question-num">3</div>
+        <p class="question-text">Explica qué son los organismos autótrofos y pon un ejemplo.</p>
+        <span class="question-arrow">›</span>
+      </div>
+      <div class="question-body">
+        <div class="dev-answer">
+          Los organismos autótrofos son aquellos capaces de producir su propio alimento a partir de sustancias inorgánicas. Las plantas son el ejemplo más claro: mediante la fotosíntesis transforman CO₂ y agua en glucosa usando la energía solar.
+        </div>
+      </div>
+    </div>
+
+    <div class="question-card" onclick="toggle(this)">
+      <div class="question-header">
+        <div class="question-num">4</div>
+        <p class="question-text">¿Qué gas se libera como subproducto de la fotosíntesis?</p>
+        <span class="question-arrow">›</span>
+      </div>
+      <div class="question-body">
+        <div class="option"><span class="option-letter">A</span>CO₂</div>
+        <div class="option"><span class="option-letter">B</span>N₂</div>
+        <div class="option"><span class="option-letter">C</span>H₂</div>
+        <div class="option correct"><span class="option-letter">D</span>O₂ ✓</div>
+      </div>
+    </div>
+
+    <div class="question-card" onclick="toggle(this)">
+      <div class="question-header">
+        <div class="question-num">5</div>
+        <p class="question-text">Describe brevemente las dos fases de la fotosíntesis.</p>
+        <span class="question-arrow">›</span>
+      </div>
+      <div class="question-body">
+        <div class="dev-answer">
+          La fase luminosa ocurre en los tilacoides y capta la energía solar para producir ATP. La fase oscura o ciclo de Calvin ocurre en el estroma y usa ese ATP para fijar el CO₂ y sintetizar glucosa.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL CORRECTOR ══ -->
+  <div id="panel-corrector" class="panel">
+    <div class="corrector-tabs">
+      <button class="ctab active" onclick="setCTab('diff',this)">🔴 Ver correcciones</button>
+      <button class="ctab inactive" onclick="setCTab('clean',this)">✅ Texto corregido</button>
+    </div>
+
+    <!-- Vista diff -->
+    <div id="ctab-diff">
+      <div class="diff-box">
+        Ayer <span class="err">fui</span><span class="fix">fui</span> al parque con mis amigos. <span class="err">Habia</span><span class="fix">Había</span> mucha gente porque <span class="err">asia</span><span class="fix">hacía</span> buen tiempo. Nos <span class="err">divertimos</span><span class="fix">divertimos</span> mucho jugando al fútbol, <span class="err">aunqe</span><span class="fix">aunque</span> al final perdimos el partido. <span class="err">Fue</span><span class="fix">Fue</span> un día <span class="err">mui</span><span class="fix">muy</span> agradable.
+      </div>
+
+      <p class="corrections-title">Correcciones encontradas</p>
+      <div class="correction-item">
+        <span class="corr-wrong">Habia</span>
+        <span class="corr-arrow">→</span>
+        <span class="corr-right">Había</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:auto">Tilde</span>
+      </div>
+      <div class="correction-item">
+        <span class="corr-wrong">asia</span>
+        <span class="corr-arrow">→</span>
+        <span class="corr-right">hacía</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:auto">Ortografía</span>
+      </div>
+      <div class="correction-item">
+        <span class="corr-wrong">aunqe</span>
+        <span class="corr-arrow">→</span>
+        <span class="corr-right">aunque</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:auto">Ortografía</span>
+      </div>
+      <div class="correction-item">
+        <span class="corr-wrong">mui</span>
+        <span class="corr-arrow">→</span>
+        <span class="corr-right">muy</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:auto">Ortografía</span>
+      </div>
+    </div>
+
+    <!-- Vista limpia -->
+    <div id="ctab-clean" class="hidden">
+      <div class="clean-box">
+        Ayer fui al parque con mis amigos. Había mucha gente porque hacía buen tiempo. Nos divertimos mucho jugando al fútbol, aunque al final perdimos el partido. Fue un día muy agradable.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL TRANSICIONES ══ -->
+  <div id="panel-transicion" class="panel">
+    <div class="transition-demo">
+      <!-- Pantalla Home -->
+      <div class="screen" id="s-home">
+        <div class="screen-icon">🏠</div>
+        <div class="screen-title">Inicio</div>
+        <div class="screen-sub">Elige una herramienta</div>
+        <div class="fake-card"></div>
+        <div class="fake-card"></div>
+      </div>
+      <!-- Pantalla Resumen -->
+      <div class="screen hidden-right" id="s-resumen">
+        <div class="screen-icon">📝</div>
+        <div class="screen-title">Resumen</div>
+        <div class="screen-sub">Resume apuntes y PDFs</div>
+        <div class="fake-card"></div>
+        <div class="fake-card"></div>
+      </div>
+      <!-- Pantalla Resultado -->
+      <div class="screen hidden-right" id="s-result">
+        <div class="screen-icon">✨</div>
+        <div class="screen-title">Resultado</div>
+        <div class="screen-sub">Tu resumen está listo</div>
+        <div class="fake-card"></div>
+        <div class="fake-card"></div>
+      </div>
+    </div>
+
+    <div class="trans-btns">
+      <div class="trans-btn" onclick="transBack()">← Atrás</div>
+      <div class="trans-btn" onclick="transNext()">Siguiente →</div>
+    </div>
+    <p class="trans-desc">Pulsa para ver la animación de transición</p>
+  </div>
+
+</div>
+
+<script>
+  // Tabs principales
+  function show(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+    document.getElementById('panel-'+id).classList.add('active')
+    btn.classList.add('active')
+  }
+
+  // Toggle preguntas examen
+  function toggle(card) {
+    card.classList.toggle('open')
+  }
+
+  // Tabs corrector
+  function setCTab(id, btn) {
+    document.querySelectorAll('.ctab').forEach(b => { b.className = 'ctab inactive' })
+    btn.className = 'ctab active'
+    document.getElementById('ctab-diff').classList.toggle('hidden', id !== 'diff')
+    document.getElementById('ctab-clean').classList.toggle('hidden', id !== 'clean')
+  }
+
+  // Transiciones
+  const screens = ['s-home', 's-resumen', 's-result']
+  let cur = 0
+
+  function transNext() {
+    if (cur >= screens.length - 1) return
+    const current = document.getElementById(screens[cur])
+    const next = document.getElementById(screens[cur + 1])
+    current.classList.add('hidden-left')
+    next.classList.remove('hidden-right')
+    cur++
+  }
+
+  function transBack() {
+    if (cur <= 0) return
+    const current = document.getElementById(screens[cur])
+    const prev = document.getElementById(screens[cur - 1])
+    current.classList.add('hidden-right')
+    prev.classList.remove('hidden-left')
+    cur--
+  }
+</script>
+</body>
+</html>

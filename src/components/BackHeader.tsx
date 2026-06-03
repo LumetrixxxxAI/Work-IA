@@ -11,6 +11,12 @@ interface BackHeaderProps {
 export function BackHeader({ title, subtitle, accentColor = colors.blue400 }: BackHeaderProps) {
   const navigate = useNavigate()
 
+  // Añadir clase de animación al montar la pantalla
+  React.useEffect(() => {
+    const el = document.querySelector('.page-root') as HTMLElement | null
+    if (el) { el.classList.add('page-enter'); setTimeout(() => el.classList.remove('page-enter'), 300) }
+  }, [])
+
   const headerStyle: CSSProperties = {
     display: 'flex',
     alignItems: 'center',

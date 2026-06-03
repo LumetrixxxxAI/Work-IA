@@ -2,7 +2,7 @@ import React, { useState, CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
-import { ResultBox } from '../components/ResultBox'
+import { CorrectorViewer } from '../components/CorrectorViewer'
 import { ProGate } from '../components/ProGate'
 import { corregirRedaccion, CorrectorResponse } from '../services/api'
 import { saveToHistorial } from '../services/historial'
@@ -99,10 +99,9 @@ function CorrectorContent() {
       </button>
 
       {result && (
-        <ResultBox
+        <CorrectorViewer
           content={result.resultado}
           tokensUsados={result.tokensUsados}
-          label={result.erroresEncontrados > 0 ? `${result.erroresEncontrados} correcciones` : 'Resultado'}
         />
       )}
     </div>

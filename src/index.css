@@ -42,3 +42,19 @@ input, textarea, select {
 
 /* Transitions */
 .btn-scale:active { transform: scale(0.97); transition: transform 0.1s; }
+
+/* Page slide-in animation */
+@keyframes slideInRight {
+  from { transform: translateX(32px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slideInUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.page-enter {
+  animation: slideInRight 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.page-enter-up {
+  animation: slideInUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
