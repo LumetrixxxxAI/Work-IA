@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { User } from 'firebase/auth'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { onAuthChange, handleRedirectResult } from '../services/auth'
 import { db } from '../services/firebase'
 import { useUserStore } from '../store/userStore'
 import { useSubscriptionStore } from '../store/subscriptionStore'
 
-export type AuthState = 'loading' | 'unauthenticated' | 'no-access' | 'authenticated'
+export type AuthState = 'loading' | 'unauthenticated' | 'no-access' | 'needs-terms' | 'authenticated'
 
 export function useAuth() {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null)
@@ -45,7 +45,11 @@ export function useAuth() {
         { merge: true }
       ).catch(() => {})
 
-      setAuthState('authenticated')
+      // Comprobar si ya aceptó los términos (leemos Firestore directamente)
+      const snap = await getDoc(doc(db, 'users', user.uid))
+      const termsAccepted = snap.data()?.termsAccepted === true
+
+      setAuthState(termsAccepted ? 'authenticated' : 'needs-terms')
     })
 
     return unsubscribe

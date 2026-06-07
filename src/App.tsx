@@ -1,7 +1,6 @@
 import React, { CSSProperties } from 'react'
 import { HashRouter as BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
-import { useUserStore } from './store/userStore'
 import { LoginScreen } from './screens/LoginScreen'
 import { TermsModal } from './components/TermsModal'
 import { HomeScreen } from './screens/HomeScreen'
@@ -83,21 +82,15 @@ function AnimatedRoutes() {
 
 export function App() {
   const { authState, firebaseUser } = useAuth()
-  const { user, isLoading } = useUserStore()
 
   if (authState === 'loading') return <Splash />
   if (authState === 'unauthenticated') return <LoginScreen />
 
-  // Esperar a que el perfil termine de cargar
-  if (isLoading) return <Splash />
-
-  // Perfil cargado (o usuario nuevo sin doc): comprobar términos
-  const termsAccepted = (user as any)?.termsAccepted === true
-  if (!termsAccepted && firebaseUser) {
+  if (authState === 'needs-terms' && firebaseUser) {
     return (
       <TermsModal
         uid={firebaseUser.uid}
-        onAccepted={() => {}} // el store se actualiza solo tras loadProfile en TermsModal
+        onAccepted={() => window.location.reload()}
       />
     )
   }
