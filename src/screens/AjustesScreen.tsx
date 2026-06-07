@@ -3,6 +3,7 @@ import { Layout } from '../components/Layout'
 import { useUser } from '../hooks/useUser'
 import { useSubscriptionStore } from '../store/subscriptionStore'
 import { signOut } from '../services/auth'
+import { createPortalSession } from '../services/stripe'
 import { colors } from '../theme/colors'
 
 const CURSOS = [
@@ -30,6 +31,7 @@ export function AjustesScreen() {
   const [curso, setCurso] = useState(user?.curso ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [portalLoading, setPortalLoading] = useState(false)
 
   const initial = (nombre || user?.displayName || 'U')[0].toUpperCase()
 
@@ -43,6 +45,17 @@ export function AjustesScreen() {
       alert('Error al guardar. Inténtalo de nuevo.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handlePortal = async () => {
+    setPortalLoading(true)
+    try {
+      const url = await createPortalSession()
+      window.location.href = url
+    } catch {
+      alert('Error al abrir el portal. Inténtalo de nuevo.')
+      setPortalLoading(false)
     }
   }
 
@@ -177,30 +190,21 @@ export function AjustesScreen() {
 
         {/* Gestionar suscripción */}
         {(isPro || isPremium) && (
-          <div style={{
-            backgroundColor: isPremium ? 'rgba(168,85,247,0.08)' : 'rgba(251,191,36,0.08)',
-            border: `1px solid ${isPremium ? 'rgba(168,85,247,0.3)' : 'rgba(251,191,36,0.25)'}`,
-            borderRadius: 14, padding: '14px 16px', marginBottom: 12,
-          }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: isPremium ? '#C084FC' : '#FBBF24', margin: '0 0 4px' }}>
-              {isPremium ? '💎 Plan Premium activo' : '👑 Plan Pro activo'}
-            </p>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '0 0 10px', lineHeight: 1.5 }}>
-              Para cancelar o modificar tu suscripción, escríbenos y lo gestionamos en menos de 24h.
-            </p>
-            <button
-              onClick={() => window.location.href = `mailto:lumetrixxx@gmail.com?subject=Gestionar suscripción Work IA&body=Hola, quiero gestionar mi suscripción. Mi email es: ${user?.email ?? ''}`}
-              style={{
-                backgroundColor: isPremium ? 'rgba(168,85,247,0.2)' : 'rgba(251,191,36,0.15)',
-                border: `1px solid ${isPremium ? 'rgba(168,85,247,0.4)' : 'rgba(251,191,36,0.35)'}`,
-                color: isPremium ? '#C084FC' : '#FBBF24',
-                padding: '10px 16px', borderRadius: 10,
-                fontSize: 13, fontWeight: 700, width: '100%',
-              }}
-            >
-              ✉️ Contactar soporte
-            </button>
-          </div>
+          <button
+            onClick={handlePortal}
+            disabled={portalLoading}
+            style={{
+              width: '100%',
+              backgroundColor: isPremium ? 'rgba(168,85,247,0.1)' : 'rgba(251,191,36,0.1)',
+              border: `1px solid ${isPremium ? 'rgba(168,85,247,0.35)' : 'rgba(251,191,36,0.3)'}`,
+              color: isPremium ? '#C084FC' : '#FBBF24',
+              padding: 14, borderRadius: 14,
+              fontSize: 15, fontWeight: 600, marginBottom: 12,
+              opacity: portalLoading ? 0.6 : 1,
+            }}
+          >
+            {portalLoading ? 'Abriendo...' : '⚙️ Gestionar suscripción'}
+          </button>
         )}
 
         {/* Sign out */}
