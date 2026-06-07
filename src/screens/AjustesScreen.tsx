@@ -54,6 +54,9 @@ export function AjustesScreen() {
     }
   }
 
+  // Solo tiene portal real quien pagó con Stripe (tiene stripeCustomerId)
+  const hasStripeSubscription = !!(user as any)?.stripeCustomerId
+
   const handleManageSubscription = async () => {
     setPortalLoading(true)
     try {
@@ -187,8 +190,8 @@ export function AjustesScreen() {
           {saving ? 'Guardando...' : saved ? '✓ Guardado' : 'Guardar cambios'}
         </button>
 
-        {/* Gestionar suscripción */}
-        {(isPro || isPremium) && (
+        {/* Gestionar suscripción — solo si tiene suscripción real de Stripe */}
+        {(isPro || isPremium) && hasStripeSubscription && (
           <button
             onClick={handleManageSubscription}
             disabled={portalLoading}
