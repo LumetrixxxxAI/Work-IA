@@ -38,10 +38,11 @@ export function TermsModal({ uid, onAccepted }: Props) {
         termsAccepted: true,
         termsAcceptedAt: serverTimestamp(),
       }, { merge: true })
-      // Actualiza el store local
+      // Recargar perfil → actualiza el store → App re-renderiza y entra
       await loadProfile(uid)
       onAccepted()
-    } catch {
+    } catch (e) {
+      console.error('Error aceptando términos:', e)
       setLoading(false)
     }
   }

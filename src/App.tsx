@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState, useEffect } from 'react'
+import React, { CSSProperties } from 'react'
 import { HashRouter as BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { useUserStore } from './store/userStore'
@@ -83,28 +83,21 @@ function AnimatedRoutes() {
 
 export function App() {
   const { authState, firebaseUser } = useAuth()
-  const { user } = useUserStore()
-  const [termsAccepted, setTermsAccepted] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    if (authState === 'authenticated' && user) {
-      // Si el campo no existe en el perfil, aún no ha aceptado
-      setTermsAccepted((user as any).termsAccepted === true)
-    }
-  }, [authState, user])
+  const { user, isLoading } = useUserStore()
 
   if (authState === 'loading') return <Splash />
   if (authState === 'unauthenticated') return <LoginScreen />
 
-  // Usuario autenticado pero perfil aún cargando
-  if (termsAccepted === null) return <Splash />
+  // Esperar a que el perfil termine de cargar
+  if (isLoading) return <Splash />
 
-  // Usuario autenticado pero no ha aceptado términos
+  // Perfil cargado (o usuario nuevo sin doc): comprobar términos
+  const termsAccepted = (user as any)?.termsAccepted === true
   if (!termsAccepted && firebaseUser) {
     return (
       <TermsModal
         uid={firebaseUser.uid}
-        onAccepted={() => setTermsAccepted(true)}
+        onAccepted={() => {}} // el store se actualiza solo tras loadProfile en TermsModal
       />
     )
   }
