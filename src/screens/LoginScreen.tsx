@@ -110,6 +110,19 @@ export function LoginScreen() {
             </>
           )}
         </button>
+
+        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.7, margin: 0 }}>
+          Al continuar aceptas nuestros{' '}
+          <span
+            onClick={() => window.open('mailto:lumetrixxx@gmail.com', '_blank')}
+            style={{ color: colors.blue400, textDecoration: 'underline', cursor: 'pointer' }}
+          >Términos de Uso</span>
+          {' '}y{' '}
+          <span
+            onClick={() => window.open('mailto:lumetrixxx@gmail.com', '_blank')}
+            style={{ color: colors.blue400, textDecoration: 'underline', cursor: 'pointer' }}
+          >Política de Privacidad</span>
+        </p>
       </div>
     </div>
   )

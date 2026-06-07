@@ -1,17 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <!-- Fondo azul oscuro -->
-  <rect width="512" height="512" rx="80" fill="#0369A1"/>
-  <!-- Cuadrado azul claro interior -->
-  <rect x="80" y="80" width="352" height="352" rx="60" fill="#38BDF8"/>
-  <!-- Letra W -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="600" viewBox="0 0 512 600">
+  <!-- Fondo azul -->
+  <rect width="512" height="600" fill="#0284C7"/>
+
+  <!-- Icono redondeado azul claro -->
+  <rect x="96" y="60" width="320" height="320" rx="72" fill="#38BDF8"/>
+
+  <!-- Letra W blanca centrada en el icono -->
   <text
     x="256"
-    y="320"
+    y="220"
     font-family="Arial Black, Arial, sans-serif"
-    font-size="220"
+    font-size="210"
+    font-weight="900"
+    fill="white"
+    text-anchor="middle"
+    dominant-baseline="central"
+  >W</text>
+
+  <!-- Texto "Work IA" -->
+  <text
+    x="256"
+    y="470"
+    font-family="Arial Black, Arial, sans-serif"
+    font-size="72"
     font-weight="900"
     fill="white"
     text-anchor="middle"
     dominant-baseline="auto"
-  >W</text>
+    letter-spacing="1"
+  >Work IA</text>
 </svg>
