@@ -1,7 +1,6 @@
 import React, { useState, CSSProperties } from 'react'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../services/firebase'
-import { useUserStore } from '../store/userStore'
 import { colors } from '../theme/colors'
 
 interface Props {
@@ -28,7 +27,6 @@ const BODY: CSSProperties = {
 export function TermsModal({ uid, onAccepted }: Props) {
   const [checked, setChecked] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { user, loadProfile } = useUserStore()
 
   const handleAccept = async () => {
     if (!checked) return
@@ -38,9 +36,7 @@ export function TermsModal({ uid, onAccepted }: Props) {
         termsAccepted: true,
         termsAcceptedAt: serverTimestamp(),
       }, { merge: true })
-      // Recargar perfil → actualiza el store → App re-renderiza y entra
-      await loadProfile(uid)
-      onAccepted()
+      onAccepted() // cambia authState a 'authenticated' directamente en memoria
     } catch (e) {
       console.error('Error aceptando términos:', e)
       setLoading(false)

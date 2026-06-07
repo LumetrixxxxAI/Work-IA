@@ -81,7 +81,7 @@ function AnimatedRoutes() {
 }
 
 export function App() {
-  const { authState, firebaseUser } = useAuth()
+  const { authState, firebaseUser, acceptTerms } = useAuth()
 
   if (authState === 'loading') return <Splash />
   if (authState === 'unauthenticated') return <LoginScreen />
@@ -90,7 +90,7 @@ export function App() {
     return (
       <TermsModal
         uid={firebaseUser.uid}
-        onAccepted={() => window.location.reload()}
+        onAccepted={acceptTerms}
       />
     )
   }

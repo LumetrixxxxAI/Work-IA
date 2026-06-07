@@ -55,5 +55,7 @@ export function useAuth() {
     return unsubscribe
   }, [])
 
-  return { firebaseUser, authState }
+  const acceptTerms = () => setAuthState('authenticated')
+
+  return { firebaseUser, authState, acceptTerms }
 }
