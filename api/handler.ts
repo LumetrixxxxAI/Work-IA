@@ -111,6 +111,23 @@ async function checkAndIncrementUsage(userId: string): Promise<void> {
   }, { merge: true })
 }
 
+// ── Guardar en historial ──────────────────────────────────────────────
+
+async function saveHistorial(userId: string, tipo: string, contenidoOriginal: string, resultado: string) {
+  try {
+    const db = getFirestore()
+    await db.collection('historial').doc(userId).collection('items').add({
+      tipo,
+      contenidoOriginal: contenidoOriginal?.slice(0, 300) ?? '',
+      resultado,
+      fecha: new Date(),
+    })
+  } catch (e) {
+    // No bloqueamos la respuesta si falla el historial
+    console.error('Error guardando historial:', e)
+  }
+}
+
 // ── Handler principal ─────────────────────────────────────────────────
 
 function sendJson(res: any, status: number, data: any) {
@@ -223,7 +240,8 @@ export default async function handler(req: any, res: any) {
         `Eres un profesor experto. Crea un resumen de ${lon[longitud] || lon.medio} en español${curso ? ` para ${curso}` : ''}. Usa estructura clara.`,
         buildContent(texto, fileBase64, fileType)
       )
-      return res.json({ resumen: text, longitud, tokensUsados })
+      await saveHistorial(userId, 'resumen', texto ?? '', text)
+      return sendJson(res, 200, { resumen: text, longitud, tokensUsados })
     }
 
     // EJERCICIOS
@@ -234,7 +252,8 @@ export default async function handler(req: any, res: any) {
         `Eres un profesor experto. Resuelve los ejercicios de forma ${niv[nivel] || niv.detallado} en español${curso ? ` para ${curso}` : ''}. Muestra todos los pasos.`,
         buildContent(texto, fileBase64, fileType)
       )
-      return res.json({ solucion: text, ejerciciosEncontrados: (texto?.match(/\d+[.)]/g) || []).length || 1, tokensUsados })
+      await saveHistorial(userId, 'ejercicios', texto ?? '', text)
+      return sendJson(res, 200, { solucion: text, ejerciciosEncontrados: (texto?.match(/\d+[.)]/g) || []).length || 1, tokensUsados })
     }
 
     // CLASE
@@ -245,18 +264,20 @@ export default async function handler(req: any, res: any) {
         `Eres un profesor brillante. Explica ${niv[nivel] || niv.intermedio} en español${curso ? ` para ${curso}` : ''}. Estructura: introducción, desarrollo con ejemplos, conclusión.`,
         buildContent(tema, fileBase64, fileType)
       )
-      return res.json({ explicacion: text, tokensUsados })
+      await saveHistorial(userId, 'clase', tema ?? '', text)
+      return sendJson(res, 200, { explicacion: text, tokensUsados })
     }
 
     // EXAMEN
     if (req.method === 'POST' && path === '/examen') {
-      const { tema, numPreguntas, tipo, curso } = body
+      const { tema, fileBase64, fileType, numPreguntas, tipo, curso } = body
       const tip: any = { test: 'tipo test con 4 opciones (señala la correcta con *)', desarrollo: 'de desarrollo', mixto: 'mixtas: mitad test, mitad desarrollo' }
       const { text, tokensUsados } = await ask(
         `Eres un profesor. Crea ${numPreguntas} preguntas de examen ${tip[tipo] || tip.mixto} sobre el tema en español${curso ? ` para ${curso}` : ''}. Incluye respuestas al final.`,
-        tema
+        buildContent(tema, fileBase64, fileType)
       )
-      return res.json({ preguntas: text, numPreguntas, tipo, tokensUsados })
+      await saveHistorial(userId, 'examen', tema ?? '', text)
+      return sendJson(res, 200, { preguntas: text, numPreguntas, tipo, tokensUsados })
     }
 
     // COMENTARIO
@@ -272,7 +293,8 @@ export default async function handler(req: any, res: any) {
         `Eres un profesor experto. Realiza un comentario ${niv[nivel] || niv.completo} de texto ${tip[tipo] || tip.literario} en español${curso ? ` para ${curso}` : ''}.`,
         buildContent(texto, fileBase64, fileType)
       )
-      return res.json({ comentario: text, tipo, tokensUsados })
+      await saveHistorial(userId, 'comentario', texto ?? '', text)
+      return sendJson(res, 200, { comentario: text, tipo, tokensUsados })
     }
 
     // ESQUEMA
@@ -283,7 +305,8 @@ export default async function handler(req: any, res: any) {
         `Eres un profesor experto. Crea un ${tip[tipo] || tip.esquema} del contenido en español${curso ? ` para ${curso}` : ''}. Sé claro y organizado.`,
         buildContent(texto, fileBase64, fileType)
       )
-      return res.json({ esquema: text, tokensUsados })
+      await saveHistorial(userId, 'esquema', texto ?? '', text)
+      return sendJson(res, 200, { esquema: text, tokensUsados })
     }
 
     // FLASHCARDS
@@ -293,7 +316,8 @@ export default async function handler(req: any, res: any) {
         `Eres un profesor experto. Crea exactamente ${num} flashcards en español${curso ? ` para ${curso}` : ''}.\nFormato de cada una:\n**Pregunta:** [pregunta]\n**Respuesta:** [respuesta]\n---`,
         buildContent(texto, fileBase64, fileType)
       )
-      return res.json({ flashcards: text, tokensUsados })
+      await saveHistorial(userId, 'flashcards', texto ?? '', text)
+      return sendJson(res, 200, { flashcards: text, tokensUsados })
     }
 
     // CORRECTOR
@@ -304,7 +328,8 @@ export default async function handler(req: any, res: any) {
         `Eres un profesor de lengua experto. ${mod[modo] || mod.ambos} en español${curso ? ` (nivel ${curso})` : ''}. Explica las correcciones principales.`,
         texto
       )
-      return res.json({ resultado: text, erroresEncontrados: (text.match(/error|corrección/gi) || []).length, tokensUsados })
+      await saveHistorial(userId, 'corrector', texto ?? '', text)
+      return sendJson(res, 200, { resultado: text, erroresEncontrados: (text.match(/error|corrección/gi) || []).length, tokensUsados })
     }
 
     // HISTORIAL GET
@@ -312,14 +337,14 @@ export default async function handler(req: any, res: any) {
       const snap = await getFirestore()
         .collection('historial').doc(userId).collection('items')
         .orderBy('fecha', 'desc').limit(50).get()
-      return res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+      return sendJson(res, 200, snap.docs.map(d => ({ id: d.id, ...d.data() })))
     }
 
     // HISTORIAL DELETE
     if (req.method === 'DELETE' && path.startsWith('/historial/')) {
       const itemId = path.split('/historial/')[1]
       await getFirestore().collection('historial').doc(userId).collection('items').doc(itemId).delete()
-      return res.json({ ok: true })
+      return sendJson(res, 200, { ok: true })
     }
 
     // STRIPE CHECKOUT
@@ -357,9 +382,9 @@ export default async function handler(req: any, res: any) {
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '')
       const userDoc = await getFirestore().collection('users').doc(userId).get()
       const customerId = userDoc.data()?.stripeCustomerId
-      if (!customerId) return res.status(400).json({ error: 'Sin suscripción activa' })
+      if (!customerId) return sendJson(res, 400, { error: 'Sin suscripción activa' })
       const session = await stripe.billingPortal.sessions.create({ customer: customerId, return_url: body.returnUrl })
-      return res.json({ url: session.url })
+      return sendJson(res, 200, { url: session.url })
     }
 
     return sendJson(res, 404, { error: 'Ruta no encontrada', path })

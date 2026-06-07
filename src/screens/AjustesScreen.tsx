@@ -26,7 +26,7 @@ const SECTION: CSSProperties = { marginBottom: 20 }
 
 export function AjustesScreen() {
   const { user, updateProfile } = useUser()
-  const { isPro } = useSubscriptionStore()
+  const { isPro, isPremium } = useSubscriptionStore()
   const [nombre, setNombre] = useState(user?.nombre ?? user?.displayName ?? '')
   const [curso, setCurso] = useState(user?.curso ?? '')
   const [saving, setSaving] = useState(false)
@@ -109,7 +109,14 @@ export function AjustesScreen() {
             </div>
           )}
           <p style={{ fontSize: 14, color: colors.muted, margin: 0 }}>{user?.email}</p>
-          {isPro ? (
+          {isPremium ? (
+            <span style={{
+              backgroundColor: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.35)',
+              borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, color: '#C084FC',
+            }}>
+              💎 Plan Premium activo
+            </span>
+          ) : isPro ? (
             <span style={{
               backgroundColor: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)',
               borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, color: '#FBBF24',
@@ -179,6 +186,25 @@ export function AjustesScreen() {
         >
           {saving ? 'Guardando...' : saved ? '✓ Guardado' : 'Guardar cambios'}
         </button>
+
+        {/* Gestionar suscripción */}
+        {(isPro || isPremium) && (
+          <button
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            style={{
+              width: '100%',
+              backgroundColor: isPremium ? 'rgba(168,85,247,0.1)' : 'rgba(251,191,36,0.1)',
+              border: `1px solid ${isPremium ? 'rgba(168,85,247,0.35)' : 'rgba(251,191,36,0.3)'}`,
+              color: isPremium ? '#C084FC' : '#FBBF24',
+              padding: 14, borderRadius: 14,
+              fontSize: 15, fontWeight: 600, marginBottom: 12,
+              opacity: portalLoading ? 0.6 : 1,
+            }}
+          >
+            {portalLoading ? 'Abriendo...' : '⚙️ Gestionar suscripción'}
+          </button>
+        )}
 
         {/* Sign out */}
         <button
