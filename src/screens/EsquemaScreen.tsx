@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
-import { ResultBox } from '../components/ResultBox'
+import { EsquemaViewer } from '../components/EsquemaViewer'
 import { ProGate } from '../components/ProGate'
 import { generarEsquema, EsquemaResponse } from '../services/api'
 import { saveToHistorial } from '../services/historial'
@@ -104,7 +104,7 @@ function EsquemaContent() {
         {loading ? '⏳ Generando...' : '🗂️ Crear esquema'}
       </button>
 
-      {result && <ResultBox content={result.esquema} tokensUsados={result.tokensUsados} />}
+      {result && <EsquemaViewer content={result.esquema} tokensUsados={result.tokensUsados} tipo={tipo} />}
     </div>
   )
 }

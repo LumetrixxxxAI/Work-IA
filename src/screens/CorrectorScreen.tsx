@@ -102,6 +102,7 @@ function CorrectorContent() {
         <CorrectorViewer
           content={result.resultado}
           tokensUsados={result.tokensUsados}
+          modo={modo}
         />
       )}
     </div>

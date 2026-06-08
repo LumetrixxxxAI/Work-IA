@@ -327,13 +327,25 @@ export default async function handler(req: any, res: any) {
     // CORRECTOR
     if (req.method === 'POST' && path === '/corrector') {
       const { texto, modo, curso } = body
-      const mod: any = { corregir: 'corrige los errores ortográficos y gramaticales marcando cada corrección', mejorar: 'mejora el estilo y vocabulario manteniendo el significado', ambos: 'primero corrige errores y luego mejora el estilo' }
+      const instruccion: Record<string, string> = {
+        corregir: 'Corrige ÚNICAMENTE los errores ortográficos, gramaticales y de puntuación.',
+        mejorar:  'Mejora ÚNICAMENTE el estilo, vocabulario y fluidez sin cambiar el significado.',
+        ambos:    'Corrige los errores ortográficos y gramaticales, y además mejora el estilo y vocabulario.',
+      }
       const { text, tokensUsados } = await ask(
-        `Eres un profesor de lengua experto. ${mod[modo] || mod.ambos} en español${curso ? ` (nivel ${curso})` : ''}. Explica las correcciones principales.`,
+        `Eres un profesor de lengua experto en español${curso ? ` (nivel ${curso})` : ''}.
+${instruccion[modo] || instruccion.ambos}
+
+FORMATO DE RESPUESTA — MUY IMPORTANTE:
+- Devuelve SOLO el texto corregido/mejorado, sin títulos, sin secciones, sin explicaciones.
+- Cada palabra o frase que hayas cambiado, márcala con este formato exacto: [original→corrección]
+- Ejemplo: Soy [juan→Juan] [carlos→Carlos] y [tengo→tenía] 17 años.
+- Si no cambias una palabra, escríbela normal sin marcadores.
+- No añadas NINGÚN texto extra antes ni después del texto corregido.`,
         texto
       )
       await saveHistorial(userId, 'corrector', texto ?? '', text)
-      return sendJson(res, 200, { resultado: text, erroresEncontrados: (text.match(/error|corrección/gi) || []).length, tokensUsados })
+      return sendJson(res, 200, { resultado: text, tokensUsados })
     }
 
     // HISTORIAL GET

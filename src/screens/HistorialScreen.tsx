@@ -1,28 +1,40 @@
 import React, { useState, useEffect, CSSProperties } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { obtenerHistorial, borrarHistorialItem, HistorialItem } from '../services/api'
 import { colors } from '../theme/colors'
 
 const TIPO_ICONS: Record<string, string> = {
-  resumen: '📝',
+  resumen:    '📝',
   ejercicios: '🧮',
-  clase: '🎓',
-  examen: '📋',
+  clase:      '🎓',
+  examen:     '📋',
   comentario: '✍️',
-  esquema: '🗂️',
+  esquema:    '🗂️',
   flashcards: '🃏',
-  corrector: '✏️',
+  corrector:  '✏️',
 }
 
 const TIPO_LABELS: Record<string, string> = {
-  resumen: 'Resumen',
+  resumen:    'Resumen',
   ejercicios: 'Ejercicios',
-  clase: 'Clase',
-  examen: 'Examen',
+  clase:      'Clase',
+  examen:     'Examen',
   comentario: 'Comentario',
-  esquema: 'Esquema',
+  esquema:    'Esquema',
   flashcards: 'Flashcards',
-  corrector: 'Corrector',
+  corrector:  'Corrector',
+}
+
+const TIPO_ACCENT: Record<string, string> = {
+  comentario: '#EC4899',
+  esquema:    '#0EA5E9',
+  examen:     '#F59E0B',
+  flashcards: '#A855F7',
+  corrector:  '#10B981',
+  resumen:    '#38BDF8',
+  ejercicios: '#F97316',
+  clase:      '#6366F1',
 }
 
 function formatFecha(fecha: any) {
@@ -35,8 +47,8 @@ function formatFecha(fecha: any) {
 export function HistorialScreen() {
   const [items, setItems] = useState<HistorialItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [expanded, setExpanded] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     obtenerHistorial()
@@ -45,7 +57,8 @@ export function HistorialScreen() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
     if (!window.confirm('¿Eliminar este elemento del historial?')) return
     setDeleting(id)
     try {
@@ -61,20 +74,14 @@ export function HistorialScreen() {
   const bg: CSSProperties = {
     minHeight: '100%',
     background: 'linear-gradient(180deg, #075985 0%, #0284C7 50%, #075985 100%)',
-    padding: '0 20px 20px',
-  }
-
-  const headerStyle: CSSProperties = {
-    paddingTop: 20,
-    paddingBottom: 16,
-    borderBottom: `1px solid ${colors.glassBorder}`,
-    marginBottom: 16,
+    padding: '0 16px 80px',
   }
 
   return (
     <Layout>
       <div style={bg}>
-        <div style={headerStyle}>
+        {/* Header */}
+        <div style={{ paddingTop: 20, paddingBottom: 16, borderBottom: `1px solid ${colors.glassBorder}`, marginBottom: 16 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.white, margin: 0 }}>🕐 Historial</h1>
           <p style={{ fontSize: 13, color: colors.muted, margin: '4px 0 0' }}>Tus consultas recientes</p>
         </div>
@@ -88,68 +95,72 @@ export function HistorialScreen() {
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Usa las herramientas para ver tu historial aquí</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {items.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  backgroundColor: colors.glass,
-                  border: `1px solid ${colors.glassBorder}`,
-                  borderRadius: 14,
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Header row */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {items.map((item) => {
+              const accent = TIPO_ACCENT[item.tipo] ?? '#38BDF8'
+              return (
                 <div
+                  key={item.id}
+                  onClick={() => navigate('/historial/detalle', { state: { item } })}
                   style={{
-                    display: 'flex', alignItems: 'center', padding: '12px 14px',
-                    cursor: 'pointer', gap: 10,
+                    backgroundColor: colors.glass,
+                    border: `1px solid ${colors.glassBorder}`,
+                    borderRadius: 14,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', padding: '12px 14px', gap: 12,
+                    transition: 'background 0.15s',
                   }}
-                  onClick={() => setExpanded(expanded === item.id ? null : item.id)}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = colors.glass)}
                 >
-                  <span style={{ fontSize: 20 }}>{TIPO_ICONS[item.tipo] ?? '📄'}</span>
+                  {/* Icono con color de acento */}
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 11, flexShrink: 0,
+                    background: `${accent}22`,
+                    border: `1px solid ${accent}44`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 20,
+                  }}>
+                    {TIPO_ICONS[item.tipo] ?? '📄'}
+                  </div>
+
+                  {/* Texto */}
                   <div style={{ flex: 1, overflow: 'hidden' }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: colors.white, margin: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: colors.white, margin: 0 }}>
                       {TIPO_LABELS[item.tipo] ?? item.tipo}
                     </p>
-                    <p style={{ fontSize: 12, color: colors.muted, margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{
+                      fontSize: 12, color: colors.muted, margin: '2px 0 0',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
                       {item.contenidoOriginal?.slice(0, 60) || 'Sin texto'}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                    <span style={{ fontSize: 11, color: colors.muted }}>
+
+                  {/* Fecha + flecha + papelera */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                    <span style={{ fontSize: 11, color: colors.muted, whiteSpace: 'nowrap' }}>
                       {item.fecha ? formatFecha(item.fecha) : ''}
                     </span>
-                    <span style={{ color: colors.muted, fontSize: 14, transition: 'transform 0.2s', transform: expanded === item.id ? 'rotate(90deg)' : 'none' }}>›</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button
+                        onClick={(e) => handleDelete(e, item.id)}
+                        disabled={deleting === item.id}
+                        style={{
+                          background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                          borderRadius: 6, padding: '2px 7px', fontSize: 11,
+                          color: '#F87171', fontWeight: 600,
+                          opacity: deleting === item.id ? 0.4 : 1,
+                        }}
+                      >
+                        {deleting === item.id ? '...' : '🗑'}
+                      </button>
+                      <span style={{ color: accent, fontSize: 16, fontWeight: 700 }}>›</span>
+                    </div>
                   </div>
                 </div>
-
-                {/* Expanded content */}
-                {expanded === item.id && (
-                  <div style={{ padding: '0 14px 14px', borderTop: `1px solid ${colors.glassBorder}` }}>
-                    <pre style={{
-                      marginTop: 12, whiteSpace: 'pre-wrap', color: 'rgba(255,255,255,0.85)',
-                      fontSize: 13, lineHeight: 1.6, fontFamily: 'inherit', margin: '12px 0 12px',
-                      maxHeight: 200, overflowY: 'auto',
-                    }}>
-                      {item.resultado}
-                    </pre>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleting === item.id}
-                      style={{
-                        backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                        borderRadius: 8, padding: '6px 12px', fontSize: 12,
-                        color: colors.error, fontWeight: 600,
-                        opacity: deleting === item.id ? 0.5 : 1,
-                      }}
-                    >
-                      {deleting === item.id ? 'Eliminando...' : '🗑 Eliminar'}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
