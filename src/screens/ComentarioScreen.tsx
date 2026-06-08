@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
-import { ResultBox } from '../components/ResultBox'
+import { ComentarioViewer } from '../components/ComentarioViewer'
 import { comentarTexto, ComentarioResponse } from '../services/api'
 import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
@@ -124,7 +124,7 @@ export function ComentarioScreen() {
           {loading ? '⏳ Analizando...' : '✍️ Comentar texto'}
         </button>
 
-        {result && <ResultBox content={result.comentario} tokensUsados={result.tokensUsados} />}
+        {result && <ComentarioViewer content={result.comentario} tokensUsados={result.tokensUsados} tipo={tipo} />}
       </div>
     </div>
   )
