@@ -72,8 +72,6 @@ function parseExam(raw: string): Question[] {
   return questions
 }
 
-const OPTION_COLORS = ['#60A5FA', '#A78BFA', '#34D399', '#FB923C']
-
 function QuestionCard({ q, index }: { q: Question; index: number }) {
   const [selected, setSelected] = useState<string | null>(null)
   const [revealed, setRevealed] = useState(false)
@@ -81,31 +79,39 @@ function QuestionCard({ q, index }: { q: Question; index: number }) {
 
   const getOptionStyle = (opt: Option) => {
     if (!answered) return {
-      bg: 'rgba(255,255,255,0.05)',
-      border: 'rgba(255,255,255,0.1)',
-      color: 'rgba(255,255,255,0.85)',
+      bg: 'rgba(255,255,255,0.08)',
+      border: 'rgba(255,255,255,0.15)',
+      color: '#fff',
+      letterBg: 'rgba(245,158,11,0.15)',
+      letterColor: '#FCD34D',
     }
     if (opt.correct) return {
       bg: 'rgba(34,197,94,0.15)',
       border: 'rgba(34,197,94,0.5)',
       color: '#4ADE80',
+      letterBg: 'rgba(34,197,94,0.3)',
+      letterColor: '#4ADE80',
     }
     if (selected === opt.letter && !opt.correct) return {
       bg: 'rgba(239,68,68,0.12)',
       border: 'rgba(239,68,68,0.4)',
       color: '#F87171',
+      letterBg: 'rgba(239,68,68,0.2)',
+      letterColor: '#F87171',
     }
     return {
       bg: 'rgba(255,255,255,0.03)',
       border: 'rgba(255,255,255,0.06)',
-      color: 'rgba(255,255,255,0.4)',
+      color: 'rgba(255,255,255,0.35)',
+      letterBg: 'rgba(255,255,255,0.05)',
+      letterColor: 'rgba(255,255,255,0.3)',
     }
   }
 
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.1)',
+      background: 'rgba(245,158,11,0.04)',
+      border: '1px solid rgba(245,158,11,0.22)',
       borderRadius: 18,
       marginBottom: 14,
       overflow: 'hidden',
@@ -113,10 +119,11 @@ function QuestionCard({ q, index }: { q: Question; index: number }) {
       {/* Número + pregunta */}
       <div style={{ padding: '16px 16px 12px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
         <div style={{
-          width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-          background: `linear-gradient(135deg, ${OPTION_COLORS[index % 4]}, ${OPTION_COLORS[(index + 1) % 4]})`,
+          width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+          border: '1.5px solid rgba(245,158,11,0.5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 13, fontWeight: 800, color: '#fff',
+          fontSize: 12, fontWeight: 800, color: '#FCD34D',
+          background: 'rgba(245,158,11,0.1)',
         }}>{q.num}</div>
         <p style={{
           flex: 1, fontSize: 14, fontWeight: 600, color: '#fff',
@@ -143,23 +150,15 @@ function QuestionCard({ q, index }: { q: Question; index: number }) {
               >
                 <div style={{
                   width: 26, height: 26, borderRadius: 8, flexShrink: 0,
-                  background: answered && opt.correct
-                    ? 'rgba(34,197,94,0.3)'
-                    : answered && selected === opt.letter && !opt.correct
-                      ? 'rgba(239,68,68,0.2)'
-                      : 'rgba(255,255,255,0.1)',
+                  background: s.letterBg,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, fontWeight: 700, color: s.color,
+                  fontSize: 12, fontWeight: 700, color: s.letterColor,
                 }}>{opt.letter}</div>
                 <span style={{ fontSize: 13, color: s.color, flex: 1, lineHeight: 1.4 }}>
                   {opt.text}
                 </span>
-                {answered && opt.correct && (
-                  <span style={{ fontSize: 16 }}>✅</span>
-                )}
-                {answered && selected === opt.letter && !opt.correct && (
-                  <span style={{ fontSize: 16 }}>❌</span>
-                )}
+                {answered && opt.correct && <span style={{ fontSize: 16 }}>✅</span>}
+                {answered && selected === opt.letter && !opt.correct && <span style={{ fontSize: 16 }}>❌</span>}
               </div>
             )
           })}
@@ -171,9 +170,9 @@ function QuestionCard({ q, index }: { q: Question; index: number }) {
                 onClick={() => setRevealed(true)}
                 style={{
                   flex: 1, padding: '8px', borderRadius: 10, fontSize: 12, fontWeight: 600,
-                  background: 'rgba(255,255,255,0.07)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  color: 'rgba(255,255,255,0.6)',
+                  background: 'rgba(245,158,11,0.1)',
+                  border: '1px solid rgba(245,158,11,0.3)',
+                  color: '#FCD34D',
                 }}
               >👁️ Ver respuesta</button>
             )}
@@ -182,9 +181,9 @@ function QuestionCard({ q, index }: { q: Question; index: number }) {
                 onClick={() => { setSelected(null); setRevealed(false) }}
                 style={{
                   flex: 1, padding: '8px', borderRadius: 10, fontSize: 12, fontWeight: 600,
-                  background: 'rgba(255,255,255,0.07)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  color: 'rgba(255,255,255,0.6)',
+                  background: 'rgba(245,158,11,0.1)',
+                  border: '1px solid rgba(245,158,11,0.3)',
+                  color: '#FCD34D',
                 }}
               >🔄 Reintentar</button>
             )}
@@ -198,7 +197,7 @@ function QuestionCard({ q, index }: { q: Question; index: number }) {
           <div style={{
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid rgba(255,255,255,0.08)',
-            borderLeft: '3px solid #60A5FA',
+            borderLeft: '3px solid #F59E0B',
             borderRadius: '0 10px 10px 0',
             padding: '10px 14px',
           }}>
