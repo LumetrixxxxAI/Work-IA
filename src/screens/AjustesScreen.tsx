@@ -191,7 +191,7 @@ export function AjustesScreen() {
         </button>
 
         {/* Suscripción — siempre visible */}
-        {(isPro || isPremium) ? (
+        {(isPro || isPremium) && !!(user as any)?.stripeCustomerId ? (
           <button
             onClick={handlePortal}
             disabled={portalLoading}
