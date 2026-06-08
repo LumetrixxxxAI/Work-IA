@@ -1,4 +1,5 @@
 import React, { useState, CSSProperties } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { useUser } from '../hooks/useUser'
 import { useSubscriptionStore } from '../store/subscriptionStore'
@@ -25,6 +26,7 @@ const LABEL: CSSProperties = {
 const SECTION: CSSProperties = { marginBottom: 20 }
 
 export function AjustesScreen() {
+  const navigate = useNavigate()
   const { user, updateProfile } = useUser()
   const { isPro, isPremium } = useSubscriptionStore()
   const [nombre, setNombre] = useState(user?.nombre ?? user?.displayName ?? '')
@@ -188,8 +190,8 @@ export function AjustesScreen() {
           {saving ? 'Guardando...' : saved ? '✓ Guardado' : 'Guardar cambios'}
         </button>
 
-        {/* Gestionar suscripción */}
-        {(isPro || isPremium) && (
+        {/* Suscripción — siempre visible */}
+        {(isPro || isPremium) ? (
           <button
             onClick={handlePortal}
             disabled={portalLoading}
@@ -204,6 +206,19 @@ export function AjustesScreen() {
             }}
           >
             {portalLoading ? 'Abriendo...' : '⚙️ Gestionar suscripción'}
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/suscripcion')}
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #FBBF24, #F59E0B)',
+              color: '#1a1a1a',
+              padding: 14, borderRadius: 14,
+              fontSize: 15, fontWeight: 700, marginBottom: 12,
+            }}
+          >
+            ✨ Ver planes — desde 3,99€/mes
           </button>
         )}
 
