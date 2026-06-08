@@ -271,9 +271,13 @@ export default async function handler(req: any, res: any) {
     // EXAMEN
     if (req.method === 'POST' && path === '/examen') {
       const { tema, fileBase64, fileType, numPreguntas, tipo, curso } = body
-      const tip: any = { test: 'tipo test con 4 opciones (señala la correcta con *)', desarrollo: 'de desarrollo', mixto: 'mixtas: mitad test, mitad desarrollo' }
+      const tip: any = {
+        test: `tipo test. Formato EXACTO para cada pregunta:\n1. Texto de la pregunta\nA) Opción incorrecta\nB) Opción incorrecta\nC) Opción correcta *\nD) Opción incorrecta`,
+        desarrollo: `de desarrollo. Formato EXACTO:\n1. Texto de la pregunta\nRespuesta: respuesta completa aquí`,
+        mixto: `mixtas (mitad test, mitad desarrollo). Usa el mismo formato que los tipos anteriores según corresponda`,
+      }
       const { text, tokensUsados } = await ask(
-        `Eres un profesor. Crea ${numPreguntas} preguntas de examen ${tip[tipo] || tip.mixto} sobre el tema en español${curso ? ` para ${curso}` : ''}. Incluye respuestas al final.`,
+        `Eres un profesor. Crea exactamente ${numPreguntas} preguntas de examen ${tip[tipo] || tip.mixto} sobre el tema en español${curso ? ` para ${curso}` : ''}. IMPORTANTE: NO incluyas campos de Nombre, Fecha ni encabezados. Empieza directamente con "1." y numera todas las preguntas. En las tipo test, marca la correcta con * al final de la opción.`,
         buildContent(tema, fileBase64, fileType)
       )
       await saveHistorial(userId, 'examen', tema ?? '', text)
