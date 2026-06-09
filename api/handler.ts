@@ -65,7 +65,7 @@ const FREE_DAILY = 3
 const FREE_MONTHLY = 20
 const PRO_MONTHLY = 80
 const PREMIUM_MONTHLY = 300
-const AI_PATHS = new Set(['/resumen', '/ejercicios', '/clase', '/examen', '/comentario', '/esquema', '/flashcards', '/corrector'])
+const AI_PATHS = new Set(['/resumen', '/ejercicios', '/clase', '/examen', '/comentario', '/esquema', '/flashcards', '/corrector', '/timeline'])
 
 async function checkAndIncrementUsage(userId: string): Promise<void> {
   const db = getFirestore()
@@ -346,6 +346,29 @@ FORMATO DE RESPUESTA — MUY IMPORTANTE:
       )
       await saveHistorial(userId, 'corrector', texto ?? '', text)
       return sendJson(res, 200, { resultado: text, tokensUsados })
+    }
+
+    // TIMELINE
+    if (req.method === 'POST' && path === '/timeline') {
+      const { tema, curso } = body
+      const { text, tokensUsados } = await ask(
+        `Eres un profesor de historia experto. Genera una línea del tiempo detallada en español${curso ? ` para nivel ${curso}` : ''}.
+
+FORMATO OBLIGATORIO — sigue este esquema exactamente:
+## [Título del tema]
+[Rango de años, ej: 1789 – 1799]
+
+### [AÑO] - [Título del evento]
+[Descripción breve del evento en 1-2 frases]
+
+### [AÑO] - [Título del evento]
+[Descripción breve]
+
+Genera entre 8 y 12 eventos ordenados cronológicamente. Cada evento debe tener año, título claro y descripción concisa.`,
+        `Crea una línea del tiempo sobre: ${tema}`
+      )
+      await saveHistorial(userId, 'timeline', tema ?? '', text)
+      return sendJson(res, 200, { timeline: text, tokensUsados })
     }
 
     // HISTORIAL GET

@@ -119,6 +119,14 @@ export async function corregirRedaccion(p: CorrectorParams): Promise<CorrectorRe
   return data
 }
 
+// --- TIMELINE ---
+export interface TimelineParams { tema: string; curso?: string }
+export interface TimelineResponse { timeline: string; tokensUsados: number }
+export async function generarTimeline(p: TimelineParams): Promise<TimelineResponse> {
+  const { data } = await apiClient.post<TimelineResponse>('/api/timeline', p)
+  return data
+}
+
 // --- HISTORIAL ---
 export interface HistorialItem {
   id: string; tipo: string; contenidoOriginal: string
