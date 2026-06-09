@@ -119,6 +119,17 @@ export async function corregirRedaccion(p: CorrectorParams): Promise<CorrectorRe
   return data
 }
 
+// --- TRADUCTOR ---
+export interface TraduccionParams {
+  texto: string; fileBase64?: string; fileType?: string
+  idioma: string; nivel: string; curso?: string
+}
+export interface TraduccionResponse { traduccion: string; tokensUsados: number }
+export async function generarTraduccion(p: TraduccionParams): Promise<TraduccionResponse> {
+  const { data } = await apiClient.post<TraduccionResponse>('/api/traductor', p)
+  return data
+}
+
 // --- TIMELINE ---
 export interface TimelineParams { tema: string; fileBase64?: string; fileType?: string; detalle?: 'resumido' | 'mixto' | 'extenso'; curso?: string }
 export interface TimelineResponse { timeline: string; tokensUsados: number }

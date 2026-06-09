@@ -8,6 +8,7 @@ import { ExamViewer } from '../components/ExamViewer'
 import { FlashcardViewer } from '../components/FlashcardViewer'
 import { CorrectorViewer } from '../components/CorrectorViewer'
 import { TimelineViewer } from '../components/TimelineViewer'
+import { TraductorViewer } from '../components/TraductorViewer'
 import { ResultBox } from '../components/ResultBox'
 import { colors } from '../theme/colors'
 
@@ -20,6 +21,7 @@ const ACCENT: Record<string, string> = {
   flashcards: '#A855F7',
   corrector:  '#10B981',
   timeline:   '#7C3AED',
+  traductor:  '#0D9488',
   resumen:    '#38BDF8',
   ejercicios: '#F97316',
   clase:      '#6366F1',
@@ -35,6 +37,7 @@ const TIPO_LABELS: Record<string, string> = {
   flashcards: 'Flashcards',
   corrector:  'Corrector',
   timeline:   'Línea del tiempo',
+  traductor:  'Traductor',
 }
 
 function formatFecha(fecha: any) {
@@ -84,6 +87,17 @@ function ResultadoViewer({ item }: { item: HistorialItem }) {
 
   if (tipo === 'timeline') {
     return <TimelineViewer content={contenido} />
+  }
+
+  if (tipo === 'traductor') {
+    return (
+      <TraductorViewer
+        content={contenido}
+        idioma={(params.idioma as string) ?? 'inglés'}
+        nivel={(params.nivel as string) ?? 'B1'}
+        textoOriginal={item?.contenidoOriginal ?? ''}
+      />
+    )
   }
 
   // resumen, ejercicios, clase → ResultBox estándar

@@ -15,6 +15,7 @@ import { CorrectorScreen } from './screens/CorrectorScreen'
 import { HistorialScreen } from './screens/HistorialScreen'
 import { HistorialDetalleScreen } from './screens/HistorialDetalleScreen'
 import { TimelineScreen } from './screens/TimelineScreen'
+import { TraductorScreen } from './screens/TraductorScreen'
 import { AjustesScreen } from './screens/AjustesScreen'
 import { PaywallScreen } from './screens/PaywallScreen'
 import { SuscripcionScreen } from './screens/SuscripcionScreen'
@@ -74,6 +75,7 @@ function AnimatedRoutes() {
         <Route path="/historial" element={<HistorialScreen />} />
         <Route path="/historial/detalle" element={<HistorialDetalleScreen />} />
         <Route path="/timeline" element={<TimelineScreen />} />
+        <Route path="/traductor" element={<TraductorScreen />} />
         <Route path="/ajustes" element={<AjustesScreen />} />
         <Route path="/suscripcion" element={<SuscripcionScreen />} />
         <Route path="/paywall" element={<PaywallScreen />} />

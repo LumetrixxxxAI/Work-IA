@@ -16,6 +16,7 @@ const ALL_TOOLS = [
   { icon: '🃏', title: 'Flashcards', description: 'Tarjetas de memorización', gradient: gradients.cardFlashcards, path: '/flashcards', pro: true },
   { icon: '✏️', title: 'Corrector', description: 'Corrige y mejora tus redacciones', gradient: gradients.cardCorrector, path: '/corrector', pro: true },
   { icon: '⏳', title: 'Línea del tiempo', description: 'Visualiza cualquier período histórico', gradient: 'linear-gradient(135deg,#3B0764,#7C3AED)', path: '/timeline', pro: true, premium: true },
+  { icon: '🌐', title: 'Traductor', description: 'Traduce apuntes a Español, Inglés o Francés', gradient: 'linear-gradient(135deg,#042f2e,#0D9488)', path: '/traductor', pro: true, premium: true },
 ]
 
 function UsageBar({ isPro, isPremium, dailyCount, monthlyCount, onUpgrade }: {

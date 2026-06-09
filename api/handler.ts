@@ -65,7 +65,7 @@ const FREE_DAILY = 3
 const FREE_MONTHLY = 20
 const PRO_MONTHLY = 80
 const PREMIUM_MONTHLY = 300
-const AI_PATHS = new Set(['/resumen', '/ejercicios', '/clase', '/examen', '/comentario', '/esquema', '/flashcards', '/corrector', '/timeline'])
+const AI_PATHS = new Set(['/resumen', '/ejercicios', '/clase', '/examen', '/comentario', '/esquema', '/flashcards', '/corrector', '/timeline', '/traductor'])
 
 async function checkAndIncrementUsage(userId: string): Promise<void> {
   const db = getFirestore()
@@ -346,6 +346,30 @@ FORMATO DE RESPUESTA — MUY IMPORTANTE:
       )
       await saveHistorial(userId, 'corrector', texto ?? '', text)
       return sendJson(res, 200, { resultado: text, tokensUsados })
+    }
+
+    // TRADUCTOR
+    if (req.method === 'POST' && path === '/traductor') {
+      const { texto, fileBase64, fileType, idioma, nivel, curso } = body
+      const nivelDesc: Record<string, string> = {
+        A1:     'nivel A1 (vocabulario muy básico, frases simples y cortas, sin tecnicismos)',
+        B1:     'nivel B1 (vocabulario intermedio, frases claras, algún tecnicismo explicado)',
+        C1:     'nivel C1 (vocabulario avanzado, estructuras complejas, tecnicismos del ámbito académico)',
+        Nativo: 'nivel nativo (vocabulario rico y natural, expresiones propias del idioma, estilo fluido y académico)',
+      }
+      const { text, tokensUsados } = await ask(
+        `Eres un traductor académico experto. Traduce el texto al ${idioma} con ${nivelDesc[nivel] ?? nivelDesc['B1']}${curso ? `, adaptado para estudiantes de ${curso}` : ''}.
+
+INSTRUCCIONES:
+- Traduce de forma fiel y precisa manteniendo el significado original
+- Adapta el vocabulario y la complejidad exactamente al nivel indicado
+- Mantén la estructura de párrafos del original
+- Devuelve ÚNICAMENTE el texto traducido, sin explicaciones, sin notas, sin el texto original
+- No añadas títulos ni encabezados`,
+        buildContent(texto || 'Traduce el contenido adjunto.', fileBase64, fileType)
+      )
+      await saveHistorial(userId, 'traductor', texto ?? '', text)
+      return sendJson(res, 200, { traduccion: text, tokensUsados })
     }
 
     // TIMELINE
