@@ -350,22 +350,30 @@ FORMATO DE RESPUESTA — MUY IMPORTANTE:
 
     // TIMELINE
     if (req.method === 'POST' && path === '/timeline') {
-      const { tema, curso } = body
+      const { tema, fileBase64, fileType, detalle, curso } = body
+      const rangoEventos: Record<string, string> = {
+        resumido: 'entre 3 y 5 eventos (solo los más importantes y decisivos)',
+        mixto:    'entre 6 y 10 eventos (los más relevantes con buen nivel de detalle)',
+        extenso:  '12 o más eventos (cobertura exhaustiva, incluyendo causas, consecuencias y eventos secundarios)',
+      }
+      const rango = rangoEventos[detalle ?? 'mixto']
       const { text, tokensUsados } = await ask(
-        `Eres un profesor de historia experto. Genera una línea del tiempo detallada en español${curso ? ` para nivel ${curso}` : ''}.
+        `Eres un profesor de historia experto. Genera una línea del tiempo en español${curso ? ` para nivel ${curso}` : ''}.
+
+Genera ${rango}. Sé coherente con el contenido: si el texto o tema abarca poco período, genera menos eventos pero más precisos. Si abarca mucho, cúbrelo bien.
 
 FORMATO OBLIGATORIO — sigue este esquema exactamente:
 ## [Título del tema]
 [Rango de años, ej: 1789 – 1799]
 
 ### [AÑO] - [Título del evento]
-[Descripción breve del evento en 1-2 frases]
+[Descripción del evento en 1-2 frases claras y directas]
 
 ### [AÑO] - [Título del evento]
-[Descripción breve]
+[Descripción]
 
-Genera entre 8 y 12 eventos ordenados cronológicamente. Cada evento debe tener año, título claro y descripción concisa.`,
-        `Crea una línea del tiempo sobre: ${tema}`
+Ordena los eventos cronológicamente. Cada evento debe tener año concreto, título claro y descripción útil para estudiar.`,
+        buildContent(`Crea una línea del tiempo sobre: ${tema || 'el contenido adjunto'}`, fileBase64, fileType)
       )
       await saveHistorial(userId, 'timeline', tema ?? '', text)
       return sendJson(res, 200, { timeline: text, tokensUsados })

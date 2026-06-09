@@ -120,7 +120,7 @@ export async function corregirRedaccion(p: CorrectorParams): Promise<CorrectorRe
 }
 
 // --- TIMELINE ---
-export interface TimelineParams { tema: string; curso?: string }
+export interface TimelineParams { tema: string; fileBase64?: string; fileType?: string; detalle?: 'resumido' | 'mixto' | 'extenso'; curso?: string }
 export interface TimelineResponse { timeline: string; tokensUsados: number }
 export async function generarTimeline(p: TimelineParams): Promise<TimelineResponse> {
   const { data } = await apiClient.post<TimelineResponse>('/api/timeline', p)

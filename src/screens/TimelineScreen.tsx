@@ -1,11 +1,20 @@
 import React, { useState, CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
+import { UploadZone, SelectedFile } from '../components/UploadZone'
 import { TimelineViewer } from '../components/TimelineViewer'
 import { generarTimeline } from '../services/api'
 import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
+
+type Detalle = 'resumido' | 'mixto' | 'extenso'
+
+const DETALLE_OPTIONS: { value: Detalle; label: string; desc: string }[] = [
+  { value: 'resumido', label: 'Resumido',  desc: '3–5 eventos' },
+  { value: 'mixto',    label: 'Mixto',     desc: '6–10 eventos' },
+  { value: 'extenso',  label: 'Extenso',   desc: '12+ eventos' },
+]
 
 const LABEL: CSSProperties = {
   fontSize: 12, fontWeight: 600, color: '#7C3AED',
@@ -15,6 +24,8 @@ const SECTION: CSSProperties = { marginBottom: 20 }
 
 function TimelineContent() {
   const [tema, setTema] = useState('')
+  const [file, setFile] = useState<SelectedFile | null>(null)
+  const [detalle, setDetalle] = useState<Detalle>('mixto')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -22,16 +33,22 @@ function TimelineContent() {
   const navigate = useNavigate()
 
   const handleGenerar = async () => {
-    if (!tema.trim()) { setError('Escribe un tema o período histórico.'); return }
+    if (!tema.trim() && !file) { setError('Escribe un tema o sube un archivo.'); return }
     setLoading(true); setResult(null); setError(null)
     try {
-      const res = await generarTimeline({ tema: tema.trim(), curso: user?.curso })
+      const res = await generarTimeline({
+        tema: tema.trim(),
+        fileBase64: file?.base64,
+        fileType: file?.type,
+        detalle,
+        curso: user?.curso,
+      })
       setResult(res.timeline)
       await saveToHistorial({
         tipo: 'timeline',
-        contenidoOriginal: tema.trim(),
+        contenidoOriginal: tema.trim() || file?.name || '',
         resultado: res.timeline.slice(0, 1000),
-        parametros: { tema: tema.trim() },
+        parametros: { tema: tema.trim(), detalle },
       })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
@@ -43,12 +60,49 @@ function TimelineContent() {
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 48px' }}>
+
+      {/* Nivel de detalle */}
+      <div style={SECTION}>
+        <span style={LABEL}>Nivel de detalle</span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {DETALLE_OPTIONS.map(opt => {
+            const active = detalle === opt.value
+            return (
+              <button
+                key={opt.value}
+                onClick={() => setDetalle(opt.value)}
+                style={{
+                  flex: 1, padding: '10px 6px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                  background: active ? 'linear-gradient(135deg,#5B21B6,#7C3AED)' : 'rgba(255,255,255,0.07)',
+                  outline: active ? '2px solid #A78BFA' : '1px solid rgba(255,255,255,0.12)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,0.7)' }}>
+                  {opt.label}
+                </div>
+                <div style={{ fontSize: 10, color: active ? '#DDD6FE' : 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                  {opt.desc}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Archivo opcional */}
+      <div style={SECTION}>
+        <span style={LABEL}>Archivo (opcional)</span>
+        <UploadZone file={file} onFileSelect={setFile} onClear={() => setFile(null)} />
+      </div>
+
+      {/* Tema */}
       <div style={SECTION}>
         <span style={LABEL}>Tema o período histórico</span>
         <textarea
           value={tema}
           onChange={(e) => setTema(e.target.value)}
-          placeholder="Ej: Segunda Guerra Mundial, Revolución Francesa, Historia de Internet, Imperio Romano..."
+          placeholder="Ej: Segunda Guerra Mundial, Revolución Francesa, Historia de Internet..."
           rows={3}
           style={{
             width: '100%', backgroundColor: colors.glass, border: `1px solid ${colors.glassBorder}`,
