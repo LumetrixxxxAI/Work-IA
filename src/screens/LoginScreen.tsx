@@ -1,29 +1,40 @@
 import React, { useState, useEffect, CSSProperties } from 'react'
-import { signInWithGoogle, handleRedirectResult } from '../services/auth'
+import { signInWithGoogle, handleRedirectResult, isIOS, isStandalone } from '../services/auth'
 import { colors } from '../theme/colors'
+
+const IOS_PWA = isIOS && isStandalone
 
 export function LoginScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [iosPending, setIosPending] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
-    handleRedirectResult()
-      .catch((e) => {
-        if (e?.code !== 'auth/null-user') {
-          setError('Error al iniciar sesión. Inténtalo de nuevo.')
-        }
-      })
-      .finally(() => setLoading(false))
+    if (!IOS_PWA) {
+      setLoading(true)
+      handleRedirectResult()
+        .catch((e) => {
+          if (e?.code !== 'auth/null-user') {
+            setError('Error al iniciar sesión. Inténtalo de nuevo.')
+          }
+        })
+        .finally(() => setLoading(false))
+    }
   }, [])
+
+  // iOS PWA: abre Safari para hacer el login con picker de cuentas
+  const handleIOSLogin = () => {
+    setIosPending(true)
+    // Abre Safari (que sí tiene cookies de Google → muestra el picker)
+    // La sesión se guarda en localStorage compartido (iOS 16.4+)
+    window.open('https://work-ia-uqb7.vercel.app/#/auth-login', '_blank')
+  }
 
   const handleGoogleSignIn = async () => {
     setLoading(true)
     setError(null)
     try {
       await signInWithGoogle()
-      // Si usó redirect, la página se recarga sola — no llegamos aquí
-      // Si usó popup (iOS/escritorio), el onAuthStateChanged dispara y carga la app
     } catch (e: unknown) {
       const err = e as { code?: string }
       const ignoredCodes = [
@@ -95,28 +106,57 @@ export function LoginScreen() {
             {error}
           </div>
         )}
-        <button
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          style={{
-            backgroundColor: colors.white,
-            color: '#1a1a1a',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 10, padding: '16px', borderRadius: 14,
-            fontSize: 16, fontWeight: 600,
-            opacity: loading ? 0.7 : 1,
-            boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-          }}
-        >
-          {loading ? (
-            <span style={{ color: '#4285F4' }}>Cargando...</span>
-          ) : (
-            <>
+
+        {/* iOS PWA: abrir Safari para el login */}
+        {IOS_PWA ? (
+          <>
+            <button
+              onClick={handleIOSLogin}
+              style={{
+                backgroundColor: colors.white, color: '#1a1a1a',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 10, padding: 16, borderRadius: 14,
+                fontSize: 16, fontWeight: 600,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+              }}
+            >
               <span style={{ fontSize: 18, fontWeight: 800, color: '#4285F4' }}>G</span>
-              Continuar con Google
-            </>
-          )}
-        </button>
+              Iniciar sesión con Google
+            </button>
+            {iosPending && (
+              <div style={{
+                background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)',
+                borderRadius: 12, padding: '12px 14px', fontSize: 13,
+                color: '#7DD3FC', textAlign: 'center', lineHeight: 1.6,
+              }}>
+                Se ha abierto Safari para elegir tu cuenta Google.<br />
+                Tras iniciar sesión, <strong style={{ color: '#38BDF8' }}>vuelve aquí</strong> y la app se cargará automáticamente.
+              </div>
+            )}
+          </>
+        ) : (
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            style={{
+              backgroundColor: colors.white, color: '#1a1a1a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 10, padding: 16, borderRadius: 14,
+              fontSize: 16, fontWeight: 600,
+              opacity: loading ? 0.7 : 1,
+              boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+            }}
+          >
+            {loading ? (
+              <span style={{ color: '#4285F4' }}>Cargando...</span>
+            ) : (
+              <>
+                <span style={{ fontSize: 18, fontWeight: 800, color: '#4285F4' }}>G</span>
+                Continuar con Google
+              </>
+            )}
+          </button>
+        )}
 
         <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.7, margin: 0 }}>
           Al continuar aceptas nuestros{' '}

@@ -12,30 +12,24 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from './firebase'
 
 // Detectar iOS (iPhone/iPad)
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
 // Detectar modo PWA standalone (añadida a pantalla de inicio)
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+export const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || (window.navigator as { standalone?: boolean }).standalone === true
 
 export async function signInWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider()
   provider.addScope('email')
   provider.addScope('profile')
-  // Forzar selección de cuenta siempre (evita autologin silencioso)
   provider.setCustomParameters({ prompt: 'select_account' })
 
-  if (isIOS) {
-    // En iOS (standalone o Safari), signInWithRedirect falla:
-    // Google redirige al Safari externo y la sesión no vuelve al PWA.
-    // signInWithPopup abre un modal interno que sí funciona en iOS.
-    await signInWithPopup(auth, provider)
-  } else if (isStandalone) {
-    // Android PWA standalone: redirect funciona correctamente
+  if (isStandalone && !isIOS) {
+    // Android PWA standalone: redirect funciona
     await signInWithRedirect(auth, provider)
   } else {
-    // Navegador normal (escritorio/Android): popup
+    // iOS (standalone o Safari) y escritorio: popup
     await signInWithPopup(auth, provider)
   }
 }
