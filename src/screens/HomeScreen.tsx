@@ -15,7 +15,7 @@ const ALL_TOOLS = [
   { icon: '🗂️', title: 'Esquema', description: 'Mapas conceptuales y esquemas', gradient: gradients.cardEsquema, path: '/esquema', pro: true },
   { icon: '🃏', title: 'Flashcards', description: 'Tarjetas de memorización', gradient: gradients.cardFlashcards, path: '/flashcards', pro: true },
   { icon: '✏️', title: 'Corrector', description: 'Corrige y mejora tus redacciones', gradient: gradients.cardCorrector, path: '/corrector', pro: true },
-  { icon: '⏳', title: 'Línea del tiempo', description: 'Visualiza cualquier período histórico', gradient: 'linear-gradient(135deg,#3B0764,#7C3AED)', path: '/timeline', pro: true },
+  { icon: '⏳', title: 'Línea del tiempo', description: 'Visualiza cualquier período histórico', gradient: 'linear-gradient(135deg,#3B0764,#7C3AED)', path: '/timeline', pro: true, premium: true },
 ]
 
 function UsageBar({ isPro, isPremium, dailyCount, monthlyCount, onUpgrade }: {
@@ -74,9 +74,9 @@ function UsageBar({ isPro, isPremium, dailyCount, monthlyCount, onUpgrade }: {
   )
 }
 
-function ToolCard({ icon, title, description, gradient, isPro, locked, onClick }: {
+function ToolCard({ icon, title, description, gradient, isPro, isPremium, locked, onClick }: {
   icon: string; title: string; description: string; gradient: string
-  isPro: boolean; locked: boolean; onClick: () => void
+  isPro: boolean; isPremium?: boolean; locked: boolean; onClick: () => void
 }) {
   const cardStyle: CSSProperties = {
     background: locked ? 'linear-gradient(135deg, #0c2a3a, #0e3550)' : gradient,
@@ -111,13 +111,19 @@ function ToolCard({ icon, title, description, gradient, isPro, locked, onClick }
         <p style={{ fontSize: 15, fontWeight: 700, color: colors.white, margin: 0 }}>{title}</p>
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', margin: '2px 0 0', lineHeight: 1.4 }}>{description}</p>
       </div>
-      {isPro && (
+      {isPremium ? (
+        <span style={{
+          background: 'linear-gradient(135deg, #7C3AED, #A855F7)',
+          color: '#fff', fontSize: 10, fontWeight: 800,
+          letterSpacing: 0.5, padding: '3px 7px', borderRadius: 6, flexShrink: 0,
+        }}>PREMIUM</span>
+      ) : isPro ? (
         <span style={{
           background: 'linear-gradient(135deg, #F59E0B, #FBBF24)',
           color: '#78350F', fontSize: 10, fontWeight: 800,
           letterSpacing: 0.5, padding: '3px 7px', borderRadius: 6, flexShrink: 0,
         }}>PRO</span>
-      )}
+      ) : null}
       <span style={{ color: locked ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.6)', fontSize: 18, marginLeft: 4 }}>
         {locked ? '🔒' : '›'}
       </span>
@@ -216,7 +222,7 @@ export function HomeScreen() {
         }}>Herramientas</p>
 
         {ALL_TOOLS.map((tool) => {
-          const locked = tool.pro && !isPro
+          const locked = (tool as any).premium ? !isPremium : tool.pro && !isPro
           return (
             <ToolCard
               key={tool.path}
@@ -224,7 +230,8 @@ export function HomeScreen() {
               title={tool.title}
               description={tool.description}
               gradient={tool.gradient}
-              isPro={tool.pro}
+              isPro={tool.pro && !(tool as any).premium}
+              isPremium={(tool as any).premium}
               locked={locked}
               onClick={() => navigate(locked ? '/paywall' : tool.path)}
             />
