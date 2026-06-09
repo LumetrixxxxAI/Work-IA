@@ -194,12 +194,13 @@ export function HomeScreen() {
           <div
             onClick={() => navigate('/suscripcion')}
             style={{
-              backgroundColor: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)',
-              borderRadius: 12, padding: '10px 16px', marginBottom: 20, textAlign: 'center', cursor: 'pointer',
+              background: 'linear-gradient(135deg, #F59E0B, #FBBF24)',
+              borderRadius: 14, padding: '13px 16px', marginBottom: 20, textAlign: 'center', cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(245,158,11,0.35)',
             }}
           >
-            <span style={{ fontSize: 13, fontWeight: 600, color: colors.blue400 }}>
-              ✨ Actualiza a Pro · 3,99€/mes →
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#1a1a1a' }}>
+              ✦ Ver planes — desde 3,99€/mes
             </span>
           </div>
         )}
