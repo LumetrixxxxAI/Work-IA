@@ -13,9 +13,9 @@ type Idioma = 'Español' | 'Inglés' | 'Francés'
 type Nivel  = 'A1' | 'B1' | 'C1' | 'Nativo'
 
 const IDIOMA_OPTIONS = [
-  { value: 'Español', label: '🇪🇸', name: 'Español' },
-  { value: 'Inglés',  label: '🇬🇧', name: 'Inglés'  },
-  { value: 'Francés', label: '🇫🇷', name: 'Francés' },
+  { value: 'Español', name: 'Español', flag: 'https://flagcdn.com/w40/es.png' },
+  { value: 'Inglés',  name: 'Inglés',  flag: 'https://flagcdn.com/w40/gb.png' },
+  { value: 'Francés', name: 'Francés', flag: 'https://flagcdn.com/w40/fr.png' },
 ]
 
 const NIVEL_OPTIONS = [
@@ -92,7 +92,7 @@ function TraductorContent() {
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                 }}
               >
-                <span style={{ fontSize: 28 }}>{opt.label}</span>
+                <img src={opt.flag} alt={opt.name} style={{ width: 36, height: 24, borderRadius: 4, objectFit: 'cover' }} />
                 <span style={{ fontSize: 11, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,0.5)' }}>
                   {opt.name}
                 </span>

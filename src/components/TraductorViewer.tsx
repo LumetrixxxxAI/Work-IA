@@ -8,9 +8,9 @@ interface Props {
 }
 
 const IDIOMA_FLAG: Record<string, string> = {
-  español: '🇪🇸',
-  inglés:  '🇬🇧',
-  francés: '🇫🇷',
+  español: 'https://flagcdn.com/w40/es.png',
+  inglés:  'https://flagcdn.com/w40/gb.png',
+  francés: 'https://flagcdn.com/w40/fr.png',
 }
 
 const NIVEL_COLOR: Record<string, { bg: string; text: string; border: string }> = {
@@ -24,7 +24,7 @@ export function TraductorViewer({ content, idioma, nivel, textoOriginal }: Props
   const [showOriginal, setShowOriginal] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  const flag = IDIOMA_FLAG[idioma.toLowerCase()] ?? '🌐'
+  const flagUrl = IDIOMA_FLAG[idioma.toLowerCase()]
   const nColor = NIVEL_COLOR[nivel] ?? NIVEL_COLOR['B1']
 
   const handleCopy = () => {
@@ -48,7 +48,10 @@ export function TraductorViewer({ content, idioma, nivel, textoOriginal }: Props
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 28 }}>{flag}</span>
+          {flagUrl
+            ? <img src={flagUrl} alt={idioma} style={{ width: 40, height: 27, borderRadius: 5, objectFit: 'cover' }} />
+            : <span style={{ fontSize: 24 }}>🌐</span>
+          }
           <div>
             <p style={{ fontSize: 15, fontWeight: 800, color: '#fff', margin: 0, textTransform: 'capitalize' }}>
               {idioma}
