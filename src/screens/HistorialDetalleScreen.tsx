@@ -9,6 +9,7 @@ import { FlashcardViewer } from '../components/FlashcardViewer'
 import { CorrectorViewer } from '../components/CorrectorViewer'
 import { TimelineViewer } from '../components/TimelineViewer'
 import { TraductorViewer } from '../components/TraductorViewer'
+import { ClaseViewer } from '../components/ClaseViewer'
 import { ResultBox } from '../components/ResultBox'
 import { colors } from '../theme/colors'
 
@@ -100,7 +101,11 @@ function ResultadoViewer({ item }: { item: HistorialItem }) {
     )
   }
 
-  // resumen, ejercicios, clase → ResultBox estándar
+  if (tipo === 'clase') {
+    return <ClaseViewer content={contenido} />
+  }
+
+  // resumen, ejercicios → ResultBox estándar
   return <ResultBox content={contenido} />
 }
 

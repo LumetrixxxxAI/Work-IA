@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
-import { ResultBox } from '../components/ResultBox'
+import { ClaseViewer } from '../components/ClaseViewer'
 import { explicarClase, ClaseResponse } from '../services/api'
 import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
@@ -112,7 +112,7 @@ export function ClaseScreen() {
           {loading ? '⏳ Explicando...' : '🎓 Explicar tema'}
         </button>
 
-        {result && <ResultBox content={result.explicacion} tokensUsados={result.tokensUsados} />}
+        {result && <ClaseViewer content={result.explicacion} />}
       </div>
     </div>
   )
