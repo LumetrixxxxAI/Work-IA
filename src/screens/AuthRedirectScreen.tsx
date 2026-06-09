@@ -12,12 +12,12 @@ import {
   getRedirectResult,
 } from 'firebase/auth'
 import { auth } from '../services/firebase'
-import { onAuthChange } from '../services/auth'
 import { colors } from '../theme/colors'
+
+const TOKEN_KEY = 'work_ia_ios_credential'
 
 export function AuthRedirectScreen() {
   const [status, setStatus] = useState<'waiting' | 'loading' | 'done' | 'error'>('waiting')
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Al volver del redirect de Google, recoger el resultado
@@ -25,6 +25,16 @@ export function AuthRedirectScreen() {
     getRedirectResult(auth)
       .then((result) => {
         if (result?.user) {
+          // Extraer el Google credential (accessToken + idToken)
+          const credential = GoogleAuthProvider.credentialFromResult(result)
+          if (credential) {
+            // Guardar en localStorage — iOS 16.4+ lo comparte con la PWA
+            localStorage.setItem(TOKEN_KEY, JSON.stringify({
+              accessToken: (credential as any).accessToken ?? null,
+              idToken:      (credential as any).idToken      ?? null,
+              ts: Date.now(),
+            }))
+          }
           setStatus('done')
         } else {
           setStatus('waiting')
@@ -33,22 +43,10 @@ export function AuthRedirectScreen() {
       .catch(() => setStatus('waiting'))
   }, [])
 
-  // Si ya está autenticado (sesión compartida o redirect completado)
-  useEffect(() => {
-    const unsub = onAuthChange((user) => {
-      if (user) {
-        setStatus('done')
-      }
-    })
-    return unsub
-  }, [])
-
   const handleLogin = () => {
     const provider = new GoogleAuthProvider()
     provider.addScope('email')
     provider.addScope('profile')
-    // NO ponemos prompt:'select_account' — dejamos que Google muestre
-    // las cuentas guardadas en Safari automáticamente
     signInWithRedirect(auth, provider)
   }
 

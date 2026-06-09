@@ -1,8 +1,14 @@
 import React, { useState, useEffect, CSSProperties } from 'react'
+import {
+  GoogleAuthProvider,
+  signInWithCredential,
+} from 'firebase/auth'
+import { auth } from '../services/firebase'
 import { signInWithGoogle, handleRedirectResult, isIOS, isStandalone } from '../services/auth'
 import { colors } from '../theme/colors'
 
 const IOS_PWA = isIOS && isStandalone
+const TOKEN_KEY = 'work_ia_ios_credential'
 
 export function LoginScreen() {
   const [loading, setLoading] = useState(false)
@@ -11,6 +17,7 @@ export function LoginScreen() {
 
   useEffect(() => {
     if (!IOS_PWA) {
+      // No iOS: manejar redirect normal
       setLoading(true)
       handleRedirectResult()
         .catch((e) => {
@@ -19,14 +26,43 @@ export function LoginScreen() {
           }
         })
         .finally(() => setLoading(false))
+      return
     }
+
+    // iOS PWA: intentar usar el token guardado por AuthRedirectScreen en Safari
+    const tryStoredCredential = async () => {
+      const raw = localStorage.getItem(TOKEN_KEY)
+      if (!raw) return
+      try {
+        const { accessToken, idToken, ts } = JSON.parse(raw)
+        // Solo válido si tiene menos de 5 minutos
+        if (Date.now() - ts > 5 * 60 * 1000) {
+          localStorage.removeItem(TOKEN_KEY)
+          return
+        }
+        setLoading(true)
+        const credential = GoogleAuthProvider.credential(idToken, accessToken)
+        await signInWithCredential(auth, credential)
+        localStorage.removeItem(TOKEN_KEY)
+      } catch {
+        localStorage.removeItem(TOKEN_KEY)
+        setLoading(false)
+      }
+    }
+
+    tryStoredCredential()
+
+    // Escuchar si Safari escribe el token mientras el PWA está abierto
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === TOKEN_KEY && e.newValue) tryStoredCredential()
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
   }, [])
 
   // iOS PWA: abre Safari para hacer el login con picker de cuentas
   const handleIOSLogin = () => {
     setIosPending(true)
-    // Abre Safari (que sí tiene cookies de Google → muestra el picker)
-    // La sesión se guarda en localStorage compartido (iOS 16.4+)
     window.open('https://work-ia-uqb7.vercel.app/#/auth-login', '_blank')
   }
 
