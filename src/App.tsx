@@ -14,7 +14,6 @@ import { FlashcardsScreen } from './screens/FlashcardsScreen'
 import { CorrectorScreen } from './screens/CorrectorScreen'
 import { HistorialScreen } from './screens/HistorialScreen'
 import { HistorialDetalleScreen } from './screens/HistorialDetalleScreen'
-import { AuthRedirectScreen } from './screens/AuthRedirectScreen'
 import { AjustesScreen } from './screens/AjustesScreen'
 import { PaywallScreen } from './screens/PaywallScreen'
 import { SuscripcionScreen } from './screens/SuscripcionScreen'
@@ -61,7 +60,6 @@ function AnimatedRoutes() {
   return (
     <div key={location.pathname} className="page-root page-enter" style={{ height: '100%' }}>
       <Routes location={location}>
-        <Route path="/auth-login" element={<AuthRedirectScreen />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/resumen" element={<ResumenScreen />} />
@@ -84,16 +82,8 @@ function AnimatedRoutes() {
   )
 }
 
-function AuthOrApp() {
+export function App() {
   const { authState, firebaseUser, acceptTerms } = useAuth()
-  const location = useLocation()
-
-  // Ruta especial para el login desde iOS PWA (se abre en Safari sin autenticación)
-  // Con HashRouter la ruta llega como pathname, no como hash
-  if (location.pathname === '/auth-login') {
-    return <AuthRedirectScreen />
-  }
-
 
   if (authState === 'loading') return <Splash />
   if (authState === 'unauthenticated') return <LoginScreen />
@@ -107,13 +97,9 @@ function AuthOrApp() {
     )
   }
 
-  return <AnimatedRoutes />
-}
-
-export function App() {
   return (
     <BrowserRouter>
-      <AuthOrApp />
+      <AnimatedRoutes />
     </BrowserRouter>
   )
 }
