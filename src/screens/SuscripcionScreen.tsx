@@ -22,9 +22,8 @@ const PRO_FEATURES = [
 
 const PREMIUM_FEATURES = [
   { icon: '🔥', text: 'Todo lo del plan Pro' },
-  { icon: '💬', text: 'Chat con IA (próximamente)' },
-  { icon: '🎯', text: 'Simulador de examen (próximamente)' },
-  { icon: '🌍', text: 'Traductor de apuntes (próximamente)' },
+  { icon: '⏳', text: 'Línea del tiempo visual' },
+  { icon: '🌐', text: 'Traductor de apuntes (ES / EN / FR)' },
   { icon: '♾️', text: 'Uso ilimitado — 300 consultas/mes' },
   { icon: '⚡', text: 'Respuestas prioritarias' },
 ]

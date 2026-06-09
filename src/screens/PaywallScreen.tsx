@@ -21,8 +21,8 @@ const PRO_FEATURES = [
 const PREMIUM_EXTRA = [
   '♾️ 300 consultas al mes',
   '🚀 Respuestas prioritarias',
-  '🎯 Simulador de examen (próx.)',
-  '💬 Chat con IA (próx.)',
+  '⏳ Línea del tiempo visual',
+  '🌐 Traductor ES / EN / FR',
 ]
 
 export function PaywallScreen() {
