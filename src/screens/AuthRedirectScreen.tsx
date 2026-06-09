@@ -1,11 +1,17 @@
 /**
  * AuthRedirectScreen — se carga en Safari (no standalone) cuando el
  * usuario pulsa "Iniciar sesión" desde el PWA instalado en iOS.
- * Hace el signInWithPopup aquí (donde Safari tiene cookies de Google)
- * y tras el éxito cierra la pestaña.
+ * Usa signInWithRedirect para llevar al usuario a google.com dentro de
+ * Safari (que SÍ tiene cookies → muestra el picker de cuentas).
+ * Al volver, getRedirectResult() recoge la sesión y se cierra la pestaña.
  */
 import React, { useEffect, useState } from 'react'
-import { signInWithGoogle } from '../services/auth'
+import {
+  GoogleAuthProvider,
+  signInWithRedirect,
+  getRedirectResult,
+} from 'firebase/auth'
+import { auth } from '../services/firebase'
 import { onAuthChange } from '../services/auth'
 import { colors } from '../theme/colors'
 
@@ -13,36 +19,37 @@ export function AuthRedirectScreen() {
   const [status, setStatus] = useState<'waiting' | 'loading' | 'done' | 'error'>('waiting')
   const [error, setError] = useState<string | null>(null)
 
-  // Si ya está autenticado (sesión heredada), cerramos directamente
+  useEffect(() => {
+    // Al volver del redirect de Google, recoger el resultado
+    setStatus('loading')
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setStatus('done')
+        } else {
+          setStatus('waiting')
+        }
+      })
+      .catch(() => setStatus('waiting'))
+  }, [])
+
+  // Si ya está autenticado (sesión compartida o redirect completado)
   useEffect(() => {
     const unsub = onAuthChange((user) => {
       if (user) {
         setStatus('done')
-        // Intentar cerrar la pestaña de Safari y volver al PWA
-        setTimeout(() => {
-          window.close()
-          // Si window.close() no funciona (Safari a veces lo bloquea),
-          // redirigimos a la app para que el usuario vuelva manualmente
-          window.location.href = 'https://work-ia-uqb7.vercel.app'
-        }, 1200)
       }
     })
     return unsub
   }, [])
 
-  const handleLogin = async () => {
-    setStatus('loading')
-    setError(null)
-    try {
-      await signInWithGoogle()
-      // onAuthChange de arriba detectará el usuario y pondrá status='done'
-    } catch (e: any) {
-      const ignored = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request']
-      if (!ignored.includes(e?.code)) {
-        setError('No se pudo iniciar sesión. Inténtalo de nuevo.')
-      }
-      setStatus('waiting')
-    }
+  const handleLogin = () => {
+    const provider = new GoogleAuthProvider()
+    provider.addScope('email')
+    provider.addScope('profile')
+    // NO ponemos prompt:'select_account' — dejamos que Google muestre
+    // las cuentas guardadas en Safari automáticamente
+    signInWithRedirect(auth, provider)
   }
 
   const bg: React.CSSProperties = {
