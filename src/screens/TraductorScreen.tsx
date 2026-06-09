@@ -13,9 +13,9 @@ type Idioma = 'Español' | 'Inglés' | 'Francés'
 type Nivel  = 'A1' | 'B1' | 'C1' | 'Nativo'
 
 const IDIOMA_OPTIONS = [
-  { value: 'Español', label: '🇪🇸 Español' },
-  { value: 'Inglés',  label: '🇬🇧 Inglés'  },
-  { value: 'Francés', label: '🇫🇷 Francés' },
+  { value: 'Español', label: '🇪🇸', name: 'Español' },
+  { value: 'Inglés',  label: '🇬🇧', name: 'Inglés'  },
+  { value: 'Francés', label: '🇫🇷', name: 'Francés' },
 ]
 
 const NIVEL_OPTIONS = [
@@ -85,16 +85,17 @@ function TraductorContent() {
                 key={opt.value}
                 onClick={() => setIdioma(opt.value as Idioma)}
                 style={{
-                  flex: 1, padding: '12px 4px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                  flex: 1, padding: '14px 4px', borderRadius: 12, border: 'none', cursor: 'pointer',
                   background: active ? `${ACCENT}33` : 'rgba(255,255,255,0.07)',
                   outline: active ? `2px solid ${ACCENT}` : '1px solid rgba(255,255,255,0.12)',
                   transition: 'all 0.15s',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                 }}
               >
-                <div style={{ fontSize: 18, marginBottom: 2 }}>{opt.label.split(' ')[0]}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,0.6)' }}>
-                  {opt.label.split(' ')[1]}
-                </div>
+                <span style={{ fontSize: 28 }}>{opt.label}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,0.5)' }}>
+                  {opt.name}
+                </span>
               </button>
             )
           })}
