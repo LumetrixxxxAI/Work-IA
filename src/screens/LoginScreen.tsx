@@ -22,9 +22,16 @@ export function LoginScreen() {
     setError(null)
     try {
       await signInWithGoogle()
+      // Si usó redirect, la página se recarga sola — no llegamos aquí
+      // Si usó popup (iOS/escritorio), el onAuthStateChanged dispara y carga la app
     } catch (e: unknown) {
       const err = e as { code?: string }
-      if (err?.code !== 'auth/popup-closed-by-user') {
+      const ignoredCodes = [
+        'auth/popup-closed-by-user',
+        'auth/cancelled-popup-request',
+        'auth/user-cancelled',
+      ]
+      if (!ignoredCodes.includes(err?.code ?? '')) {
         setError('No se pudo iniciar sesión. Inténtalo de nuevo.')
       }
       setLoading(false)
