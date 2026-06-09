@@ -13,10 +13,10 @@ const ALL_TOOLS = [
   { icon: '📋', title: 'Examen', description: 'Genera preguntas de examen', gradient: gradients.cardExamen, path: '/examen', pro: true },
   { icon: '✍️', title: 'Comentario', description: 'Analiza y comenta cualquier texto', gradient: gradients.cardComentario, path: '/comentario', pro: true },
   { icon: '🗂️', title: 'Esquema', description: 'Mapas conceptuales y esquemas', gradient: gradients.cardEsquema, path: '/esquema', pro: true },
-  { icon: '🃏', title: 'Flashcards', description: 'Tarjetas de memorización', gradient: gradients.cardFlashcards, path: '/flashcards', pro: true },
+  { icon: '🃏', title: 'Flashcards', description: 'Tarjetas de memorización', gradient: 'linear-gradient(135deg,#1e1b4b,#4338CA)', path: '/flashcards', pro: true },
   { icon: '✏️', title: 'Corrector', description: 'Corrige y mejora tus redacciones', gradient: gradients.cardCorrector, path: '/corrector', pro: true },
   { icon: '⏳', title: 'Línea del tiempo', description: 'Visualiza cualquier período histórico', gradient: 'linear-gradient(135deg,#3B0764,#7C3AED)', path: '/timeline', pro: true, premium: true },
-  { icon: '🌐', title: 'Traductor', description: 'Traduce apuntes a Español, Inglés o Francés', gradient: 'linear-gradient(135deg,#1e1b4b,#4338CA)', path: '/traductor', pro: true, premium: true },
+  { icon: '🌐', title: 'Traductor', description: 'Traduce apuntes a Español, Inglés o Francés', gradient: 'linear-gradient(135deg,#78350F,#F59E0B)', path: '/traductor', pro: true, premium: true },
 ]
 
 function UsageBar({ isPro, isPremium, dailyCount, monthlyCount, onUpgrade }: {
