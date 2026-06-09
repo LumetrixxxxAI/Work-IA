@@ -60,12 +60,6 @@ export function LoginScreen() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // iOS PWA: abre Safari para hacer el login con picker de cuentas
-  const handleIOSLogin = () => {
-    setIosPending(true)
-    window.open('https://work-ia-uqb7.vercel.app/#/auth-login', '_blank')
-  }
-
   const handleGoogleSignIn = async () => {
     setLoading(true)
     setError(null)
@@ -143,30 +137,47 @@ export function LoginScreen() {
           </div>
         )}
 
-        {/* iOS PWA: abrir Safari para el login */}
+        {/* iOS PWA: link directo que iOS abre en Safari (window.open queda bloqueado) */}
         {IOS_PWA ? (
           <>
-            <button
-              onClick={handleIOSLogin}
-              style={{
-                backgroundColor: colors.white, color: '#1a1a1a',
+            {loading ? (
+              <div style={{
+                backgroundColor: colors.white, color: '#4285F4',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 gap: 10, padding: 16, borderRadius: 14,
                 fontSize: 16, fontWeight: 600,
                 boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-              }}
-            >
-              <span style={{ fontSize: 18, fontWeight: 800, color: '#4285F4' }}>G</span>
-              Iniciar sesión con Google
-            </button>
-            {iosPending && (
+              }}>
+                Iniciando sesión…
+              </div>
+            ) : (
+              <a
+                href="https://work-ia-uqb7.vercel.app/#/auth-login"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setIosPending(true)}
+                style={{
+                  backgroundColor: colors.white, color: '#1a1a1a',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  gap: 10, padding: 16, borderRadius: 14,
+                  fontSize: 16, fontWeight: 600, textDecoration: 'none',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                }}
+              >
+                <span style={{ fontSize: 18, fontWeight: 800, color: '#4285F4' }}>G</span>
+                Iniciar sesión con Google
+              </a>
+            )}
+            {iosPending && !loading && (
               <div style={{
                 background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)',
                 borderRadius: 12, padding: '12px 14px', fontSize: 13,
-                color: '#7DD3FC', textAlign: 'center', lineHeight: 1.6,
+                color: '#7DD3FC', textAlign: 'center', lineHeight: 1.8,
               }}>
-                Se ha abierto Safari para elegir tu cuenta Google.<br />
-                Tras iniciar sesión, <strong style={{ color: '#38BDF8' }}>vuelve aquí</strong> y la app se cargará automáticamente.
+                <strong style={{ color: '#38BDF8', fontSize: 14 }}>Se ha abierto Safari 🌐</strong><br />
+                1. Elige tu cuenta de Google<br />
+                2. Cuando veas ✅, <strong style={{ color: '#fff' }}>vuelve aquí</strong><br />
+                La app entrará sola automáticamente.
               </div>
             )}
           </>
