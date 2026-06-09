@@ -36,6 +36,8 @@ export function TermsModal({ uid, onAccepted }: Props) {
         termsAccepted: true,
         termsAcceptedAt: serverTimestamp(),
       }, { merge: true })
+      // Guardar en localStorage para no volver a preguntar
+      localStorage.setItem(`terms_accepted_${uid}`, 'true')
       onAccepted() // cambia authState a 'authenticated' directamente en memoria
     } catch (e) {
       console.error('Error aceptando términos:', e)

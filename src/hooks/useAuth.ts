@@ -45,10 +45,19 @@ export function useAuth() {
         { merge: true }
       ).catch(() => {})
 
-      // Comprobar si ya aceptó los términos (leemos Firestore directamente)
+      // Comprobar si ya aceptó los términos
+      // 1. Primero localStorage (instantáneo, sin red)
+      const localKey = `terms_accepted_${user.uid}`
+      if (localStorage.getItem(localKey) === 'true') {
+        setAuthState('authenticated')
+        return
+      }
+      // 2. Si no está en local, consultar Firestore
       const snap = await getDoc(doc(db, 'users', user.uid))
       const termsAccepted = snap.data()?.termsAccepted === true
-
+      if (termsAccepted) {
+        localStorage.setItem(localKey, 'true') // cachear para la próxima vez
+      }
       setAuthState(termsAccepted ? 'authenticated' : 'needs-terms')
     })
 
