@@ -47,14 +47,14 @@ export function LoginScreen() {
     <div style={bg}>
       {/* Logo */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 60, gap: 16 }}>
-        <div style={{
-          width: 88, height: 88, borderRadius: 24,
-          background: '#38BDF8',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 48, fontWeight: 900, color: '#fff',
-          fontFamily: 'Arial Black, Arial, sans-serif',
-          boxShadow: '0 4px 24px rgba(56,189,248,0.45)',
-        }}>W</div>
+        <img
+          src="/apple-touch-icon.png"
+          alt="Work IA"
+          style={{
+            width: 88, height: 88, borderRadius: 22,
+            boxShadow: '0 4px 24px rgba(56,189,248,0.45)',
+          }}
+        />
         <h1 style={{ fontSize: 34, fontWeight: 800, color: colors.white, margin: 0 }}>Work IA</h1>
         <p style={{ fontSize: 16, color: colors.muted, margin: 0, textAlign: 'center' }}>
           Tu asistente de estudio con IA
