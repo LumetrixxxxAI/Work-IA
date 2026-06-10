@@ -36,7 +36,7 @@ function Splash() {
   }
   return (
     <div style={s}>
-      <img src="/logo.png" alt="Work IA" style={{ width: 80, height: 80, boxShadow: '0 4px 24px rgba(56,189,248,0.45)' }} />
+      <img src="/apple-touch-icon.png" alt="Work IA" style={{ width: 80, height: 80, borderRadius: 20, boxShadow: '0 4px 24px rgba(56,189,248,0.45)' }} />
       <p style={{ fontSize: 24, fontWeight: 800, color: colors.white }}>Work IA</p>
       <div style={{ marginTop: 8 }}>
         <div style={{

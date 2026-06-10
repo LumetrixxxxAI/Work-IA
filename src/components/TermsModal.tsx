@@ -54,7 +54,7 @@ export function TermsModal({ uid, onAccepted }: Props) {
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <img src="/logo.png" alt="Work IA" style={{ width: 40, height: 40 }} />
+          <img src="/apple-touch-icon.png" alt="Work IA" style={{ width: 40, height: 40, borderRadius: 10 }} />
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 800, color: colors.white, margin: 0 }}>
               Bienvenido a Work IA

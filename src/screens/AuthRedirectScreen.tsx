@@ -85,7 +85,7 @@ export function AuthRedirectScreen() {
   return (
     <div style={bg}>
       {/* Logo */}
-      <img src="/logo.png" alt="Work IA" style={{ width: 72, height: 72, boxShadow: '0 4px 20px rgba(56,189,248,0.4)' }} />
+      <img src="/apple-touch-icon.png" alt="Work IA" style={{ width: 72, height: 72, borderRadius: 18, boxShadow: '0 4px 20px rgba(56,189,248,0.4)' }} />
 
       <div style={{ textAlign: 'center' }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: colors.white, margin: '0 0 8px' }}>
