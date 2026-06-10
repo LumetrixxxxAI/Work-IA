@@ -20,6 +20,7 @@ import { AjustesScreen } from './screens/AjustesScreen'
 import { PaywallScreen } from './screens/PaywallScreen'
 import { SuscripcionScreen } from './screens/SuscripcionScreen'
 import { SuccessScreen } from './screens/SuccessScreen'
+import { PrivacidadScreen } from './screens/PrivacidadScreen'
 import { colors } from './theme/colors'
 
 const BG = 'linear-gradient(180deg, #075985 0%, #0284C7 50%, #075985 100%)'
@@ -73,6 +74,7 @@ function AnimatedRoutes() {
         <Route path="/suscripcion" element={<SuscripcionScreen />} />
         <Route path="/paywall" element={<PaywallScreen />} />
         <Route path="/success" element={<SuccessScreen />} />
+        <Route path="/privacidad" element={<PrivacidadScreen />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </div>
