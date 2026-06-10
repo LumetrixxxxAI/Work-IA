@@ -21,6 +21,7 @@ import { PaywallScreen } from './screens/PaywallScreen'
 import { SuscripcionScreen } from './screens/SuscripcionScreen'
 import { SuccessScreen } from './screens/SuccessScreen'
 import { PrivacidadScreen } from './screens/PrivacidadScreen'
+import { EliminarCuentaScreen } from './screens/EliminarCuentaScreen'
 import { colors } from './theme/colors'
 
 const BG = 'linear-gradient(180deg, #075985 0%, #0284C7 50%, #075985 100%)'
@@ -75,6 +76,7 @@ function AnimatedRoutes() {
         <Route path="/paywall" element={<PaywallScreen />} />
         <Route path="/success" element={<SuccessScreen />} />
         <Route path="/privacidad" element={<PrivacidadScreen />} />
+        <Route path="/eliminar-cuenta" element={<EliminarCuentaScreen />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </div>
