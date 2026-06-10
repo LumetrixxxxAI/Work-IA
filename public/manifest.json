@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Work IA",
   "short_name": "Work IA",
   "description": "Tu asistente de estudio con inteligencia artificial",
@@ -7,6 +8,7 @@
   "background_color": "#075985",
   "theme_color": "#0284C7",
   "orientation": "portrait",
+  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",
