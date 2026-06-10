@@ -46,7 +46,7 @@ export function EjerciciosScreen() {
       await saveToHistorial({
         tipo: 'ejercicios',
         contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.solucion.slice(0, 1000),
+        resultado: res.solucion,
         parametros: { nivel },
       })
     } catch (e: unknown) {

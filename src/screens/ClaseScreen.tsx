@@ -46,7 +46,7 @@ export function ClaseScreen() {
       await saveToHistorial({
         tipo: 'clase',
         contenidoOriginal: tema.trim().slice(0, 500) || file?.name || '',
-        resultado: res.explicacion.slice(0, 1000),
+        resultado: res.explicacion,
         parametros: { nivel },
       })
     } catch (e: unknown) {

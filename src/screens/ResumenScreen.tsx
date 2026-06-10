@@ -47,7 +47,7 @@ export function ResumenScreen() {
       await saveToHistorial({
         tipo: 'resumen',
         contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.resumen.slice(0, 1000),
+        resultado: res.resumen,
         parametros: { longitud },
       })
     } catch (e: unknown) {

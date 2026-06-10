@@ -47,7 +47,7 @@ function FlashcardsContent() {
       await saveToHistorial({
         tipo: 'flashcards',
         contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.flashcards.slice(0, 1000),
+        resultado: res.flashcards,
         parametros: { num },
       })
     } catch (e: unknown) {

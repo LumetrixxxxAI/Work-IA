@@ -47,7 +47,7 @@ function EsquemaContent() {
       await saveToHistorial({
         tipo: 'esquema',
         contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.esquema.slice(0, 1000),
+        resultado: res.esquema,
         parametros: { tipo },
       })
     } catch (e: unknown) {

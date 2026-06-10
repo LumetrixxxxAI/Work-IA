@@ -43,7 +43,7 @@ function CorrectorContent() {
       await saveToHistorial({
         tipo: 'corrector',
         contenidoOriginal: texto.trim().slice(0, 500),
-        resultado: res.resultado.slice(0, 1000),
+        resultado: res.resultado,
         parametros: { modo },
       })
     } catch (e: unknown) {

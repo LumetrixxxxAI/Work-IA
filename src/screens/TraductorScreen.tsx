@@ -60,7 +60,7 @@ function TraductorContent() {
       await saveToHistorial({
         tipo: 'traductor',
         contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.traduccion.slice(0, 1000),
+        resultado: res.traduccion,
         parametros: { idioma, nivel },
       })
     } catch (e: unknown) {

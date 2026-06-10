@@ -50,7 +50,7 @@ export function ExamenScreen() {
       await saveToHistorial({
         tipo: 'examen',
         contenidoOriginal: tema.trim().slice(0, 500),
-        resultado: res.preguntas.slice(0, 1000),
+        resultado: res.preguntas,
         parametros: { tipo, numPreguntas },
       })
     } catch (e: unknown) {

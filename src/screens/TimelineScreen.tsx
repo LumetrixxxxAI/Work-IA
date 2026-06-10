@@ -47,7 +47,7 @@ function TimelineContent() {
       await saveToHistorial({
         tipo: 'timeline',
         contenidoOriginal: tema.trim() || file?.name || '',
-        resultado: res.timeline.slice(0, 1000),
+        resultado: res.timeline,
         parametros: { tema: tema.trim(), detalle },
       })
     } catch (e: unknown) {

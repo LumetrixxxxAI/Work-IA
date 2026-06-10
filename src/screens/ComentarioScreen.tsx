@@ -53,7 +53,7 @@ export function ComentarioScreen() {
       await saveToHistorial({
         tipo: 'comentario',
         contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.comentario.slice(0, 1000),
+        resultado: res.comentario,
         parametros: { tipo, nivel },
       })
     } catch (e: unknown) {
