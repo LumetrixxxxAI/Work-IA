@@ -85,13 +85,7 @@ export function AuthRedirectScreen() {
   return (
     <div style={bg}>
       {/* Logo */}
-      <div style={{
-        width: 72, height: 72, borderRadius: 20, background: '#38BDF8',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 40, fontWeight: 900, color: '#fff',
-        fontFamily: 'Arial Black, Arial, sans-serif',
-        boxShadow: '0 4px 20px rgba(56,189,248,0.4)',
-      }}>W</div>
+      <img src="/logo.png" alt="Work IA" style={{ width: 72, height: 72, boxShadow: '0 4px 20px rgba(56,189,248,0.4)' }} />
 
       <div style={{ textAlign: 'center' }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: colors.white, margin: '0 0 8px' }}>

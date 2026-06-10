@@ -48,12 +48,9 @@ export function LoginScreen() {
       {/* Logo */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 60, gap: 16 }}>
         <img
-          src="/apple-touch-icon.png"
+          src="/logo.png"
           alt="Work IA"
-          style={{
-            width: 88, height: 88, borderRadius: 22,
-            boxShadow: '0 4px 24px rgba(56,189,248,0.45)',
-          }}
+          style={{ width: 88, height: 88, boxShadow: '0 4px 24px rgba(56,189,248,0.45)' }}
         />
         <h1 style={{ fontSize: 34, fontWeight: 800, color: colors.white, margin: 0 }}>Work IA</h1>
         <p style={{ fontSize: 16, color: colors.muted, margin: 0, textAlign: 'center' }}>
