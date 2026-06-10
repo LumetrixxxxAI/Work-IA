@@ -172,7 +172,7 @@ export function FlashcardViewer({ content, tokensUsados }: Props) {
       {mode === 'swipe' ? (
         <div>
           {/* Tarjeta actual */}
-          <FlipCard card={cards[current]} index={current} total={cards.length} />
+          <FlipCard key={current} card={cards[current]} index={current} total={cards.length} />
 
           {/* Navegación */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
