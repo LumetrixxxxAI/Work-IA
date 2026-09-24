@@ -64,7 +64,7 @@ async function ask(system: string, userContent: any) {
 const FREE_DAILY = 3
 const FREE_MONTHLY = 20
 const PRO_MONTHLY = 80
-const PREMIUM_MONTHLY = 300
+const PREMIUM_MONTHLY = 150
 const AI_PATHS = new Set(['/resumen', '/ejercicios', '/clase', '/examen', '/comentario', '/esquema', '/flashcards', '/corrector', '/timeline', '/traductor'])
 
 async function checkAndIncrementUsage(userId: string): Promise<void> {
