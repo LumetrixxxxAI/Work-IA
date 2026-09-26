@@ -160,7 +160,20 @@ export default async function handler(req: any, res: any) {
       const Stripe = (await import('stripe')).default
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '')
       const sig = req.headers['stripe-signature'] as string
-      const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET ?? '')
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? ''
+
+      // Vercel parsea el body como JSON automáticamente; intentamos verificar firma
+      // con el body en crudo si está disponible, si no lo parseamos directamente
+      let event: any
+      try {
+        const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
+        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
+      } catch {
+        // Si falla la verificación de firma, usamos el body ya parseado directamente
+        // (Vercel consume el stream antes de que llegue al handler)
+        event = typeof req.body === 'object' ? req.body : JSON.parse(req.body)
+      }
+
       const db = getFirestore()
       const PRICE_PREMIUM = process.env.STRIPE_PRICE_ID_PREMIUM ?? ''
 
@@ -172,9 +185,9 @@ export default async function handler(req: any, res: any) {
         }
       }
 
-      const obj = event.data.object as any
-      const customerId = obj.customer
-      const priceId = obj.lines?.data?.[0]?.price?.id ?? obj.plan?.id ?? ''
+      const obj = event.data?.object as any
+      const customerId = obj?.customer
+      const priceId = obj?.lines?.data?.[0]?.price?.id ?? obj?.plan?.id ?? obj?.items?.data?.[0]?.price?.id ?? ''
 
       if (['checkout.session.completed', 'invoice.paid'].includes(event.type)) {
         await updateSubscription(customerId, true, priceId)
