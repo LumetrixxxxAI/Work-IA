@@ -1,14 +1,20 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/handler" },
-    { "source": "/__/auth/(.*)", "destination": "https://work-ia-f1955.firebaseapp.com/__/auth/$1" },
-    { "source": "/((?!api/)(?!__/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/)(?!\\.well-known/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
       "source": "/index.html",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "no-cache" }
       ]
     }
   ]
