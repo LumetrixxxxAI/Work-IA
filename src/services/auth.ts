@@ -25,12 +25,11 @@ export async function signInWithGoogle(): Promise<void> {
   provider.addScope('profile')
   provider.setCustomParameters({ prompt: 'select_account' })
 
-  if (isStandalone && !isIOS) {
-    // Android PWA: usa redirect (funciona correctamente)
+  if (!isIOS) {
+    // Android (TWA, Custom Tab, navegador): siempre redirect
     await signInWithRedirect(auth, provider)
   } else {
-    // iOS PWA, iOS Safari, escritorio: popup
-    // (en iOS el redirect causa bucle infinito en WKWebView)
+    // iOS: popup (el redirect causa bucle en WKWebView)
     await signInWithPopup(auth, provider)
   }
 }
