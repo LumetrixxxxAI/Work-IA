@@ -19,15 +19,12 @@ export function LoginScreen() {
     setError(null)
     try {
       await signInWithGoogle()
+      // signInWithRedirect navega fuera, no llega aquí en Android
     } catch (e: unknown) {
-      const err = e as { code?: string }
-      const ignored = [
-        'auth/popup-closed-by-user',
-        'auth/cancelled-popup-request',
-        'auth/user-cancelled',
-      ]
-      if (!ignored.includes(err?.code ?? '')) {
-        setError('No se pudo iniciar sesión. Inténtalo de nuevo.')
+      const err = e as { code?: string; message?: string }
+      const cancelCodes = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/user-cancelled']
+      if (!cancelCodes.includes(err?.code ?? '')) {
+        setError(`Error: ${err?.code ?? err?.message ?? 'Inténtalo de nuevo'}`)
       }
       setLoading(false)
     }

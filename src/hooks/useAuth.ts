@@ -28,37 +28,43 @@ export function useAuth() {
 
       setFirebaseUser(user)
       setHasAccess(true)
-      await Promise.all([
-        loadProfile(user.uid),
-        checkPro(user.uid, user.email ?? ''),
-      ])
 
-      // Actualizar último login
-      setDoc(
-        doc(db, 'users', user.uid),
-        {
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          lastLogin: serverTimestamp(),
-        },
-        { merge: true }
-      ).catch(() => {})
+      try {
+        await Promise.all([
+          loadProfile(user.uid),
+          checkPro(user.uid, user.email ?? ''),
+        ])
 
-      // Comprobar si ya aceptó los términos
-      // 1. Primero localStorage (instantáneo, sin red)
-      const localKey = `terms_accepted_${user.uid}`
-      if (localStorage.getItem(localKey) === 'true') {
+        // Actualizar último login
+        setDoc(
+          doc(db, 'users', user.uid),
+          {
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            lastLogin: serverTimestamp(),
+          },
+          { merge: true }
+        ).catch(() => {})
+
+        // Comprobar si ya aceptó los términos
+        // 1. Primero localStorage (instantáneo, sin red)
+        const localKey = `terms_accepted_${user.uid}`
+        if (localStorage.getItem(localKey) === 'true') {
+          setAuthState('authenticated')
+          return
+        }
+        // 2. Si no está en local, consultar Firestore
+        const snap = await getDoc(doc(db, 'users', user.uid))
+        const termsAccepted = snap.data()?.termsAccepted === true
+        if (termsAccepted) {
+          localStorage.setItem(localKey, 'true')
+        }
+        setAuthState(termsAccepted ? 'authenticated' : 'needs-terms')
+      } catch {
+        // Si Firestore falla, el usuario está autenticado igualmente
         setAuthState('authenticated')
-        return
       }
-      // 2. Si no está en local, consultar Firestore
-      const snap = await getDoc(doc(db, 'users', user.uid))
-      const termsAccepted = snap.data()?.termsAccepted === true
-      if (termsAccepted) {
-        localStorage.setItem(localKey, 'true') // cachear para la próxima vez
-      }
-      setAuthState(termsAccepted ? 'authenticated' : 'needs-terms')
     })
 
     return unsubscribe
