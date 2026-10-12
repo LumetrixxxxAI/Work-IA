@@ -43,7 +43,7 @@ function PlanCard({ title, price, period, features, color, bg, border, badge, ct
       borderRadius: 20, overflow: 'hidden', marginBottom: 16,
       position: 'relative',
     }}>
-      {badge && (
+      {badge && !current && (
         <div style={{
           position: 'absolute', top: 12, right: 12,
           background: ctaBg, color: ctaColor,

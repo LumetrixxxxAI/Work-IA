@@ -31,7 +31,7 @@ export function Layout({ children }: LayoutProps) {
     flex: 1,
     overflowY: 'auto',
     overflowX: 'hidden',
-    paddingBottom: 70,
+    paddingBottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
     WebkitOverflowScrolling: 'touch' as CSSProperties['WebkitOverflowScrolling'],
   }
 
@@ -47,7 +47,8 @@ export function Layout({ children }: LayoutProps) {
     borderTop: `1px solid ${colors.glassBorder}`,
     display: 'flex',
     justifyContent: 'space-around',
-    padding: '10px 0 env(safe-area-inset-bottom, 10px)',
+    paddingTop: 10,
+    paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
     zIndex: 100,
   }
 
