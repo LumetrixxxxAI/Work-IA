@@ -19,6 +19,11 @@ export function UploadZone({ file, onFileSelect, onClear }: UploadZoneProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
     if (!f) return
+    if (f.size > 10 * 1024 * 1024) {
+      alert('El archivo no puede superar 10 MB.')
+      e.target.value = ''
+      return
+    }
     const reader = new FileReader()
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string

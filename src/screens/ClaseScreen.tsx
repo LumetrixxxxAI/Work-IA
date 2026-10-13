@@ -5,7 +5,6 @@ import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
 import { ClaseViewer } from '../components/ClaseViewer'
 import { explicarClase, ClaseResponse } from '../services/api'
-import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
 
@@ -43,12 +42,6 @@ export function ClaseScreen() {
         curso: user?.curso,
       })
       setResult(res)
-      await saveToHistorial({
-        tipo: 'clase',
-        contenidoOriginal: tema.trim().slice(0, 500) || file?.name || '',
-        resultado: res.explicacion,
-        parametros: { nivel },
-      })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al explicar. Inténtalo de nuevo.')

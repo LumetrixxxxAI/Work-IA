@@ -4,7 +4,6 @@ import { BackHeader } from '../components/BackHeader'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
 import { TimelineViewer } from '../components/TimelineViewer'
 import { generarTimeline } from '../services/api'
-import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
 
@@ -44,12 +43,6 @@ function TimelineContent() {
         curso: user?.curso,
       })
       setResult(res.timeline)
-      await saveToHistorial({
-        tipo: 'timeline',
-        contenidoOriginal: tema.trim() || file?.name || '',
-        resultado: res.timeline,
-        parametros: { tema: tema.trim(), detalle },
-      })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al generar. Inténtalo de nuevo.')

@@ -5,7 +5,6 @@ import { LengthPills } from '../components/LengthPills'
 import { CorrectorViewer } from '../components/CorrectorViewer'
 import { ProGate } from '../components/ProGate'
 import { corregirRedaccion, CorrectorResponse } from '../services/api'
-import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
 
@@ -40,12 +39,6 @@ function CorrectorContent() {
         curso: user?.curso,
       })
       setResult(res)
-      await saveToHistorial({
-        tipo: 'corrector',
-        contenidoOriginal: texto.trim().slice(0, 500),
-        resultado: res.resultado,
-        parametros: { modo },
-      })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al corregir. Inténtalo de nuevo.')

@@ -7,8 +7,20 @@ interface ResultBoxProps {
   label?: string
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 function renderMarkdown(text: string): string {
-  return text
+  // Escape all HTML first to prevent XSS; markdown substitutions below
+  // produce safe HTML strings from the now-sanitized plain text.
+  const t = escapeHtml(text)
+  return t
     // Bloques de código
     .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;overflow-x:auto;font-size:13px;margin:8px 0;">$1</pre>')
     // Código inline

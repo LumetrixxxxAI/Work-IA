@@ -4,7 +4,6 @@ import { BackHeader } from '../components/BackHeader'
 import { LengthPills } from '../components/LengthPills'
 import { ExamViewer } from '../components/ExamViewer'
 import { generarExamen, ExamenResponse } from '../services/api'
-import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
 
@@ -47,12 +46,6 @@ export function ExamenScreen() {
         curso: user?.curso,
       })
       setResult(res)
-      await saveToHistorial({
-        tipo: 'examen',
-        contenidoOriginal: tema.trim().slice(0, 500),
-        resultado: res.preguntas,
-        parametros: { tipo, numPreguntas },
-      })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al generar. Inténtalo de nuevo.')

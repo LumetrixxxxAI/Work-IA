@@ -6,7 +6,6 @@ import { UploadZone, SelectedFile } from '../components/UploadZone'
 import { EsquemaViewer } from '../components/EsquemaViewer'
 import { ProGate } from '../components/ProGate'
 import { generarEsquema, EsquemaResponse } from '../services/api'
-import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
 
@@ -44,12 +43,6 @@ function EsquemaContent() {
         curso: user?.curso,
       })
       setResult(res)
-      await saveToHistorial({
-        tipo: 'esquema',
-        contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.esquema,
-        parametros: { tipo },
-      })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al generar. Inténtalo de nuevo.')

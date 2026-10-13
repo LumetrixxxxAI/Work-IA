@@ -208,12 +208,19 @@ export default async function handler(req: any, res: any) {
 
       const obj = event.data?.object as any
       const customerId = obj?.customer
-      const priceId = obj?.lines?.data?.[0]?.price?.id ?? obj?.plan?.id ?? obj?.items?.data?.[0]?.price?.id ?? ''
 
-      if (['checkout.session.completed', 'invoice.paid'].includes(event.type)) {
+      if (event.type === 'invoice.paid') {
+        // invoice.paid includes line items with the exact price ID
+        const priceId = obj?.lines?.data?.[0]?.price?.id ?? ''
         await updateSubscription(customerId, true, priceId)
-      } else if (['customer.subscription.deleted', 'invoice.payment_failed'].includes(event.type)) {
+      } else if (event.type === 'customer.subscription.deleted') {
         await updateSubscription(customerId, false)
+      } else if (event.type === 'invoice.payment_failed') {
+        // Do NOT deactivate on subscription_create (Stripe fires this before
+        // the actual first payment attempt, with attempt_count = 0)
+        if (obj?.billing_reason !== 'subscription_create' && (obj?.attempt_count ?? 0) > 0) {
+          await updateSubscription(customerId, false)
+        }
       }
       return sendJson(res, 200, { received: true })
     } catch (e: any) {
@@ -472,13 +479,20 @@ Ordena los eventos cronológicamente. Cada evento debe tener año concreto, tít
         customerId = c.id
         await db.collection('users').doc(userId).set({ stripeCustomerId: customerId }, { merge: true })
       }
+      const APP_ORIGIN = 'https://work-ia-uqb7.vercel.app'
+      const safeUrl = (url: string, fallback: string) => {
+        try {
+          const u = new URL(url)
+          return u.origin === APP_ORIGIN ? url : fallback
+        } catch { return fallback }
+      }
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         payment_method_types: ['card'],
         line_items: [{ price: PRICE_ID, quantity: 1 }],
         mode: 'subscription',
-        success_url: body.successUrl,
-        cancel_url: body.cancelUrl,
+        success_url: safeUrl(body.successUrl, `${APP_ORIGIN}/#/success`),
+        cancel_url: safeUrl(body.cancelUrl, `${APP_ORIGIN}/#/suscripcion`),
         locale: 'es',
       })
       return sendJson(res, 200, { url: session.url })

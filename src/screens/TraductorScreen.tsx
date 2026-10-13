@@ -5,7 +5,6 @@ import { UploadZone, SelectedFile } from '../components/UploadZone'
 import { LengthPills } from '../components/LengthPills'
 import { TraductorViewer } from '../components/TraductorViewer'
 import { generarTraduccion } from '../services/api'
-import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
 
@@ -57,12 +56,6 @@ function TraductorContent() {
         curso: user?.curso,
       })
       setResult(res.traduccion)
-      await saveToHistorial({
-        tipo: 'traductor',
-        contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.traduccion,
-        parametros: { idioma, nivel },
-      })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al traducir. Inténtalo de nuevo.')

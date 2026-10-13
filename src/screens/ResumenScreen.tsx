@@ -5,7 +5,6 @@ import { LengthPills } from '../components/LengthPills'
 import { UploadZone, SelectedFile } from '../components/UploadZone'
 import { ResultBox } from '../components/ResultBox'
 import { generarResumen, ResumenResponse } from '../services/api'
-import { saveToHistorial } from '../services/historial'
 import { useUser } from '../hooks/useUser'
 import { colors } from '../theme/colors'
 
@@ -44,12 +43,6 @@ export function ResumenScreen() {
         curso: user?.curso,
       })
       setResult(res)
-      await saveToHistorial({
-        tipo: 'resumen',
-        contenidoOriginal: texto.trim().slice(0, 500) || file?.name || '',
-        resultado: res.resumen,
-        parametros: { longitud },
-      })
     } catch (e: unknown) {
       if ((e as any)?.isLimit) { navigate('/paywall'); return }
       setError(e instanceof Error ? e.message : 'Error al generar. Inténtalo de nuevo.')
