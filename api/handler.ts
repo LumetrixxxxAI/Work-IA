@@ -3,6 +3,10 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import { getAuth } from 'firebase-admin/auth'
 
+// Disable Vercel's automatic body parsing so we can read the raw bytes
+// needed for Stripe webhook signature verification
+export const config = { api: { bodyParser: false } }
+
 // Firebase Admin
 if (getApps().length === 0) {
   initializeApp({
@@ -15,6 +19,24 @@ if (getApps().length === 0) {
 }
 
 const claude = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+// Buffer the raw request body from the stream
+function readRawBody(req: any): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    // If bodyParser was disabled, body arrives as a stream
+    if (req.body !== undefined) {
+      // Already buffered (e.g. in some test/edge environments)
+      const buf = Buffer.isBuffer(req.body)
+        ? req.body
+        : Buffer.from(typeof req.body === 'string' ? req.body : JSON.stringify(req.body))
+      return resolve(buf)
+    }
+    const chunks: Buffer[] = []
+    req.on('data', (c: Buffer) => chunks.push(c))
+    req.on('end', () => resolve(Buffer.concat(chunks)))
+    req.on('error', reject)
+  })
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -147,6 +169,10 @@ export default async function handler(req: any, res: any) {
     return
   }
 
+  // Read raw body once (bodyParser is disabled so body is a stream)
+  const rawBuf = await readRawBody(req)
+  const rawStr = rawBuf.toString('utf8')
+
   const path = getPath(req)
 
   // Health check
@@ -154,7 +180,7 @@ export default async function handler(req: any, res: any) {
     return sendJson(res, 200, { ok: true, path, method: req.method })
   }
 
-  // Stripe webhook (sin auth)
+  // Stripe webhook — verify signature with raw bytes
   if (req.method === 'POST' && path === '/stripe/webhook') {
     try {
       const Stripe = (await import('stripe')).default
@@ -162,16 +188,11 @@ export default async function handler(req: any, res: any) {
       const sig = req.headers['stripe-signature'] as string
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? ''
 
-      // Vercel parsea el body como JSON automáticamente; intentamos verificar firma
-      // con el body en crudo si está disponible, si no lo parseamos directamente
       let event: any
       try {
-        const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
-        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
-      } catch {
-        // Si falla la verificación de firma, usamos el body ya parseado directamente
-        // (Vercel consume el stream antes de que llegue al handler)
-        event = typeof req.body === 'object' ? req.body : JSON.parse(req.body)
+        event = stripe.webhooks.constructEvent(rawBuf, sig, webhookSecret)
+      } catch (sigErr: any) {
+        return sendJson(res, 400, { error: `Webhook signature invalid: ${sigErr.message}` })
       }
 
       const db = getFirestore()
@@ -211,7 +232,10 @@ export default async function handler(req: any, res: any) {
     return sendJson(res, 401, { error: 'No autorizado', detail: authErr.message })
   }
 
-  const body = req.body ?? {}
+  let body: any = {}
+  try {
+    if (rawStr.length > 0) body = JSON.parse(rawStr)
+  } catch { /* body stays empty for non-JSON requests */ }
 
   try {
     // USAGE CHECK para rutas de IA
