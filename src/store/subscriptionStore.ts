@@ -8,6 +8,7 @@ const ADMIN_EMAIL = 'jcocana2009@gmail.com'
 interface SubscriptionStore {
   isPro: boolean
   isPremium: boolean
+  isAdminOverride: boolean
   isLoading: boolean
   checkPro: (uid: string, email?: string) => Promise<void>
   setPro: (value: boolean) => void
@@ -17,13 +18,14 @@ interface SubscriptionStore {
 export const useSubscriptionStore = create<SubscriptionStore>((set) => ({
   isPro: false,
   isPremium: false,
+  isAdminOverride: false,
   isLoading: true,
 
   checkPro: async (uid: string, email?: string) => {
     set({ isLoading: true })
     try {
       if (email === ADMIN_EMAIL) {
-        set({ isPro: true, isPremium: true })
+        set({ isPro: true, isPremium: true, isAdminOverride: true })
         await setDoc(doc(db, 'users', uid), { isPro: true, isPremium: true }, { merge: true }).catch(() => {})
         return
       }

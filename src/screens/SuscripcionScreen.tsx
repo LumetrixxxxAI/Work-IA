@@ -107,7 +107,7 @@ function PlanCard({ title, price, period, features, color, bg, border, badge, ct
 }
 
 export function SuscripcionScreen() {
-  const { isPro, isPremium, refreshPro } = useSubscriptionStore()
+  const { isPro, isPremium, isAdminOverride, refreshPro } = useSubscriptionStore()
   const [proLoading, setProLoading] = useState(false)
   const [premiumLoading, setPremiumLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
@@ -194,7 +194,7 @@ export function SuscripcionScreen() {
           ctaLabel={currentPlan === 'pro' ? '⚙️ Gestionar suscripción' : currentPlan === 'premium' ? '↓ Cambiar a Pro' : '✨ Suscribirse — 3,99€/mes'}
           ctaColor="#1a1a1a"
           ctaBg="linear-gradient(135deg, #FBBF24, #F59E0B)"
-          onCta={currentPlan === 'pro' ? handlePortal : currentPlan === 'free' ? handleSubscribePro : undefined}
+          onCta={currentPlan === 'pro' ? (isAdminOverride ? undefined : handlePortal) : currentPlan === 'free' ? handleSubscribePro : undefined}
           loading={currentPlan === 'pro' ? portalLoading : proLoading}
           current={currentPlan === 'pro'}
           disabled={currentPlan === 'premium'}
@@ -213,7 +213,7 @@ export function SuscripcionScreen() {
           ctaLabel={currentPlan === 'premium' ? '⚙️ Gestionar suscripción' : '💎 Suscribirse — 6,99€/mes'}
           ctaColor="#1a1a1a"
           ctaBg="linear-gradient(135deg, #C084FC, #A855F7)"
-          onCta={currentPlan === 'premium' ? handlePortal : handleSubscribePremium}
+          onCta={currentPlan === 'premium' ? (isAdminOverride ? undefined : handlePortal) : handleSubscribePremium}
           loading={currentPlan === 'premium' ? portalLoading : premiumLoading}
           current={currentPlan === 'premium'}
         />
